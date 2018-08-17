@@ -40,20 +40,25 @@ class MeetupApiClient:
         parameters['key'] = api_key()
         if not table.find_one({'url': api_method}):
             res = self.get_item(api_method, parameters)
+            header = res.headers
             table.insert_one({'url': api_method,
                               'header': res.headers,
                               'data': res.json(),
                               'urlcode': res.status_code})
-        master_res = res.json()
-        while ('Link' in res.headers and
-               res.headers['Link'].partition(',')[0].partition(';')[2] == ' rel="next"'):
-            next = res.headers.get('Link').partition(';')[0].strip('<>')
+        else:
+            header = table.find_one({'url': api_method})['header']
+        while ('Link' in header and
+               header['Link'].partition(',')[0].partition(';')[2] == ' rel="next"'):
+            next = header['Link'].partition(';')[0].strip('<>')
             if not table.find_one({'url': next}):
                 res = self.get_item(next, {'key': api_key()})
-                table.insert_one({'url': res.url,
+                header = res.headers
+                table.insert_one({'url': next,
                                   'header': res.headers,
                                   'data': res.json(),
                                   'urlcode': res.status_code})
+            else:
+                header = table.find_one({'url': next})['header']
 
     def get_item(self, api_method, parameters):
         n = 0
@@ -86,7 +91,6 @@ class MeetupApiClient:
         inconsistant on how many 400 errors are returned, might depend on
         internet connection
         '''
-        location['only'] = 'lat,lon,urlname'
         groups = group_table.find()
         for group in groups:
             group_name = group['data']['urlname']
