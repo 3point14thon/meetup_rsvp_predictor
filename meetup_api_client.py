@@ -85,39 +85,39 @@ class MeetupApiClient:
         return self.get_items(urlname + '/events', params, table)
 
 
-    def find_past_events(self, location, start_date,
-                         end_date, group_table, event_table):
+    def find_past_events(self, start_date, end_date, group_table, event_table):
         '''
         inconsistant on how many 400 errors are returned, might depend on
         internet connection
         '''
-        groups = group_table.find()
-        for group in groups:
-            group_name = group['data']['urlname']
-            params = {'fields': '''description_images,
-                                   event_hosts,
-                                   featured,
-                                   featured_photo,
-                                   fee_options,
-                                   group_category,
-                                   group_join_info,
-                                   group_key_photo,
-                                   group_membership_dues,
-                                   meta_category,
-                                   best_topics,
-                                   group_past_event_count,
-                                   group_photo,
-                                   group_pro_network,
-                                   group_topics,
-                                   group_join_info,
-                                   how_to_find_us,
-                                   group_visibility,
-                                   plain_text_no_images_description,
-                                   rsvp_rules,
-                                   series,
-                                   answers
-                                   ''',
-                      'no_earlier_than': start_date,
-                      'no_later_than': end_date,
-                      'status': 'past'}
-            self.get_events(params, group_name, event_table)
+        super_groups = group_table.find()
+        for groups in super_groups:
+            for group in groups['data']:
+                group_name = group['urlname']
+                params = {'fields': '''description_images,
+                                       event_hosts,
+                                       featured,
+                                       featured_photo,
+                                       fee_options,
+                                       group_category,
+                                       group_join_info,
+                                       group_key_photo,
+                                       group_membership_dues,
+                                       meta_category,
+                                       best_topics,
+                                       group_past_event_count,
+                                       group_photo,
+                                       group_pro_network,
+                                       group_topics,
+                                       group_join_info,
+                                       how_to_find_us,
+                                       group_visibility,
+                                       plain_text_no_images_description,
+                                       rsvp_rules,
+                                       series,
+                                       answers
+                                       ''',
+                          'no_earlier_than': start_date,
+                          'no_later_than': end_date,
+                          'status': 'past'}
+                self.get_events(params, event_table, group_name)
