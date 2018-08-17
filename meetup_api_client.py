@@ -35,62 +35,85 @@ class MeetupApiClient:
         self.meetup_url = 'https://api.meetup.com/'
         self.url_code_log = []
 
-    def get_item(self, api_method, parameters):
+    def get_items(self, api_method, parameters, table):
+        api_method = self.meetup_url + api_method
         parameters['key'] = api_key()
-        res = requests.get(self.meetup_url + api_method, parameters)
-        if res.headers['X-RateLimit-Remaining'] == 0:
+        if not table.find_one({'url': api_method}):
+            res = self.get_item(api_method, parameters)
+            table.insert_one({'url': api_method,
+                              'header': res.headers,
+                              'data': res.json(),
+                              'urlcode': res.status_code})
+        master_res = res.json()
+        while ('Link' in res.headers and
+               res.headers['Link'].partition(',')[0].partition(';')[2] == ' rel="next"'):
+            next = res.headers.get('Link').partition(';')[0].strip('<>')
+            if not table.find_one({'url': next}):
+                res = self.get_item(next, {'key': api_key()})
+                table.insert_one({'url': res.url,
+                                  'header': res.headers,
+                                  'data': res.json(),
+                                  'urlcode': res.status_code})
+
+    def get_item(self, api_method, parameters):
+        n = 0
+        response = self.stage(api_method, parameters)
+        while (response.status_code == 400) and (n != 100):
+            response = self.stage(api_method, parameters)
+            n += 1
+        return response
+
+    def stage(self, api_method, parameters):
+        res = requests.get(api_method, parameters)
+        if (res.headers['X-RateLimit-Remaining']) == '0':
             sleep(float(res.headers['X-RateLimit-Reset']))
         return res
 
-    def get_groups(self, params):
+    def get_groups(self, params, table):
         #possible parameters are described here:
         #https://www.meetup.com/meetup_api/docs/2/groups/
-        return self.get_item('find/groups', params)
+        return self.get_items('find/groups', params, table)
 
-    def get_events(self, params):
+    def get_events(self, params, table, urlname):
         #possible parameters are described here:
         #https://www.meetup.com/meetup_api/docs/2/events/
-        return self.get_item('2/events', params)
+        return self.get_items(urlname + '/events', params, table)
 
 
-    def find_past_events(self, location, start_date, end_date, table):
+    def find_past_events(self, location, start_date,
+                         end_date, group_table, event_table):
         '''
         inconsistant on how many 400 errors are returned, might depend on
         internet connection
         '''
-        group_events_dict = {}
         location['only'] = 'lat,lon,urlname'
-        content = self.get_groups(location)
-        if content.status_code != requests.codes.ok:
-            raise ValueError(str(response.status_code) +
-                             ' response code from meetup when requesting groups')
-        groups = content.json()['results']
-        group_log = []
+        groups = group_table.find()
         for group in groups:
-            group_name = group['urlname']
-            params = {'time': '{},{}'.format(start_date, end_date),
-                      'status': 'past',
-                      'group_urlname': group_name,
-                      'fields': '''event_hosts,
-                                   membership_d...,
-                                   series,
-                                   group_approved,
+            group_name = group['data']['urlname']
+            params = {'fields': '''description_images,
+                                   event_hosts,
+                                   featured,
+                                   featured_photo,
+                                   fee_options,
+                                   group_category,
+                                   group_join_info,
+                                   group_key_photo,
+                                   group_membership_dues,
+                                   meta_category,
+                                   best_topics,
+                                   group_past_event_count,
                                    group_photo,
-                                   photo_album_id,
-                                   photo_count,
+                                   group_pro_network,
+                                   group_topics,
+                                   group_join_info,
+                                   how_to_find_us,
+                                   group_visibility,
+                                   plain_text_no_images_description,
                                    rsvp_rules,
-                                   survey_questions,
-                                   timezone,
-                                   comment_count'''}
-            if not table.find_one({'urlname': group_name}):
-                #consider putting a while not urlcode 200 here but be carful
-                response = self.get_events(params)
-                n = 0
-                while response.status_code == 400 and n != 100:
-                    response = self.get_events(params)
-                    n += 1
-                self.url_code_log.append(response.status_code)
-                table.insert_one({'urlname': group_name,
-                                  'data': response.json(),
-                                  'urlcode': response.status_code})
-        return group_events_dict
+                                   series,
+                                   answers
+                                   ''',
+                      'no_earlier_than': start_date,
+                      'no_later_than': end_date,
+                      'status': 'past'}
+            self.get_events(params, group_name, event_table)
