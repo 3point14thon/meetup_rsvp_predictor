@@ -36,12 +36,18 @@ class MeetupApiClient:
         self.url_code_log = []
 
     def get_items(self, api_method, parameters, table):
+        if api_method == 'find/groups':
+            id = api_method
+            for key in parameters:
+                id += parameters[key]
+        else:
+            id = api_method
         api_method = self.meetup_url + api_method
         parameters['key'] = api_key()
-        if not table.find_one({'url': api_method}):
+        if not table.find_one({'url': id}):
             res = self.get_item(api_method, parameters)
             header = res.headers
-            table.insert_one({'url': api_method,
+            table.insert_one({'url': id,
                               'header': res.headers,
                               'data': res.json(),
                               'urlcode': res.status_code})
