@@ -33,38 +33,47 @@ class MeetupApiClient:
     '''
     def __init__(self):
         self.meetup_url = 'https://api.meetup.com/'
-        self.url_code_log = []
+        self.current_res = None
+        self.prev_res = None
 
-    def get_items(self, api_method, parameters, table):
+    def make_group_key(self, api_method, parameters):
         if api_method == 'find/groups':
-            id = api_method
             for key in parameters:
-                id += parameters[key]
+                api_method += parameters[key]
+            return api_method
         else:
-            id = api_method
-        api_method = self.meetup_url + api_method
-        parameters['key'] = api_key()
-        if not table.find_one({'url': id}):
+            return api_method
+
+    def cache_if_new(self, table, id_, api_method, parameters):
+        if not table.find_one({'url': id_}):
             res = self.get_item(api_method, parameters)
-            header = res.headers
-            table.insert_one({'url': id,
+            table.insert_one({'url': id_,
                               'header': res.headers,
                               'data': res.json(),
                               'urlcode': res.status_code})
+            return res.headers
         else:
-            header = table.find_one({'url': api_method})['header']
-        while ('Link' in header and
-               header['Link'].partition(',')[0].partition(';')[2] == ' rel="next"'):
-            next = header['Link'].partition(';')[0].strip('<>')
-            if not table.find_one({'url': next}):
-                res = self.get_item(next, {'key': api_key()})
-                header = res.headers
-                table.insert_one({'url': next,
-                                  'header': res.headers,
-                                  'data': res.json(),
-                                  'urlcode': res.status_code})
-            else:
-                header = table.find_one({'url': next})['header']
+            return table.find_one({'url': id_})['header']
+
+    def partition_link(self, header):
+        return header['Link'].partition(',')[0].partition(';')
+
+    def has_next(self, header):
+        return self.partition_link(header)[2] == ' rel="next"'
+
+    def next_link(self, header):
+        return self.partition_link(header)[0].strip('<>')
+
+    def get_items(self, api_method, parameters, table):
+        id_ = self.make_group_key(api_method, parameters)
+        api_method = self.meetup_url + api_method
+        parameters['key'] = api_key()
+        header = self.cache_if_new(table, id_, api_method, parameters)
+        while 'Link' in header and self.has_next(header):
+            self.prev_res = header
+            header = self.cache_if_new(table=table, id_=self.next_link(header),
+                                       api_method=self.next_link(header),
+                                       parameters={'key': api_key()})
 
     def get_item(self, api_method, parameters):
         n = 0
@@ -76,6 +85,7 @@ class MeetupApiClient:
 
     def stage(self, api_method, parameters):
         res = requests.get(api_method, parameters)
+        self.current_res = res
         if (res.headers['X-RateLimit-Remaining']) == '0':
             sleep(float(res.headers['X-RateLimit-Reset']))
         return res
@@ -83,12 +93,12 @@ class MeetupApiClient:
     def get_groups(self, params, table):
         #possible parameters are described here:
         #https://www.meetup.com/meetup_api/docs/2/groups/
-        return self.get_items('find/groups', params, table)
+        self.get_items('find/groups', params, table)
 
     def get_events(self, params, table, urlname):
         #possible parameters are described here:
         #https://www.meetup.com/meetup_api/docs/2/events/
-        return self.get_items(urlname + '/events', params, table)
+        self.get_items(urlname + '/events', params, table)
 
 
     def find_past_events(self, start_date, end_date, group_table, event_table):
