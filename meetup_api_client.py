@@ -47,10 +47,12 @@ class MeetupApiClient:
     def cache_if_new(self, table, id_, api_method, parameters):
         if not table.find_one({'url': id_}):
             res = self.get_item(api_method, parameters)
-            table.insert_one({'url': id_,
-                              'header': res.headers,
-                              'data': res.json(),
-                              'urlcode': res.status_code})
+            if res.status_code != 404:
+                table.insert_one({'url': id_,
+                                  'header': res.headers,
+                                  'data': res.json(),
+                                  'urlcode': res.status_code})
+                self.api_cooldown(res.headers)
             return res.headers
         else:
             return table.find_one({'url': id_})['header']
@@ -77,18 +79,15 @@ class MeetupApiClient:
 
     def get_item(self, api_method, parameters):
         n = 0
-        response = self.stage(api_method, parameters)
+        response = requests.get(api_method, parameters)
         while (response.status_code == 400) and (n != 100):
-            response = self.stage(api_method, parameters)
+            response = requests.get(api_method, parameters)
             n += 1
         return response
 
-    def stage(self, api_method, parameters):
-        res = requests.get(api_method, parameters)
-        self.current_res = res
-        if (res.headers['X-RateLimit-Remaining']) == '0':
-            sleep(float(res.headers['X-RateLimit-Reset']))
-        return res
+    def api_cooldown(self, header):
+        if (header['X-RateLimit-Remaining']) == '0':
+            sleep(float(header['X-RateLimit-Reset']))
 
     def get_groups(self, params, table):
         #possible parameters are described here:
@@ -106,7 +105,7 @@ class MeetupApiClient:
         inconsistant on how many 400 errors are returned, might depend on
         internet connection
         '''
-        super_groups = group_table.find()
+        super_groups = group_table.find(no_cursor_timeout=True)
         for groups in super_groups:
             for group in groups['data']:
                 group_name = group['urlname']
