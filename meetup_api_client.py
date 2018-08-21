@@ -91,12 +91,12 @@ class MeetupApiClient:
 
     def get_groups(self, params, table):
         #possible parameters are described here:
-        #https://www.meetup.com/meetup_api/docs/2/groups/
+        #https://www.meetup.com/meetup_api/docs/find/groups/
         self.get_items('find/groups', params, table)
 
     def get_events(self, params, table, urlname):
         #possible parameters are described here:
-        #https://www.meetup.com/meetup_api/docs/2/events/
+        #https://www.meetup.com/meetup_api/docs/:urlname/events/
         self.get_items(urlname + '/events', params, table)
 
 
