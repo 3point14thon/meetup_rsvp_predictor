@@ -10,7 +10,6 @@ def get_data_from_mongo(percent_data):
     count = 0
     np.random.seed(1969)
     nums = np.random.randint(0, num_events, int(num_events * percent_data))
-    #import pdb; pdb.set_trace()
     for event in ed.find():
         if count in nums:
             data.append(event)
