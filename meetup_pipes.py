@@ -5,6 +5,7 @@ import operator
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, LabelBinarizer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestRegressor
 
 class FeatureSelector(BaseEstimator, TransformerMixin):
     def __init__(self, key, as_numpy=False):
@@ -48,3 +49,11 @@ class FillWith(BaseEstimator, TransformerMixin):
 
     def transform(self, X, *args, **kwargs):
         return X.fillna(self.fill_with)
+
+class RFRWrapper(RandomForestRegressor):
+    def transform(self, X):
+        return self
+
+    def fit_transform(self, X, y):
+        self.fit(X, y)
+        return self
