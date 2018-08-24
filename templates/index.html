@@ -64,7 +64,13 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-8 mx-auto">
-            <h2 class="text-white mb-4"><input id=userTextInput></input></h2>
+            <form action="/action_page.php" id="event_details">
+              Event Name:<br>
+              <input type="text" name="event_name"><br>
+            </form>
+              Event Description:<br>
+            <textarea name="event_description" form="event_details" cols="50" rows="10">
+            </textarea>
             <p class="text-white-50"><a href="#projects" onclick="predict()" class="btn btn-primary js-scroll-trigger" id="enterText">RSPV my event!</a></p>
           </div>
         </div>
