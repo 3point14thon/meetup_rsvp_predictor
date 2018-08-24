@@ -1,6 +1,7 @@
 let get_input_text = function() {
     let text_input = $("input#userTextInput").val()
-    return {'text_input': text_input} 
+    //let variable = $("input#idofthing").val()
+    return {'text_input': text_input} //this thing behaves like a dict
 };
 let send_text_json = function(text_input) {
     $.ajax({
