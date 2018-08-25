@@ -1,10 +1,12 @@
+import sys
+sys.path.append("..")
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import Imputer, Binarizer
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestRegressor
-from meetup_pipes import (FeatureSelector, MapFeature, CustomBinarizer, FillWith,
+from .meetup_pipes import (FeatureSelector, MapFeature, CustomBinarizer, FillWith,
                           RFRWrapper)
 
 name_tfidf = Pipeline([
