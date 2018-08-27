@@ -7,7 +7,7 @@ from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestRegressor
 from .meetup_pipes import (FeatureSelector, MapFeature, CustomBinarizer, FillWith,
-                          RFRWrapper)
+                          EncodeFeature, RFRWrapper)
 
 name_tfidf = Pipeline([
     ('select_name', FeatureSelector('name')),
@@ -27,6 +27,27 @@ visibility = Pipeline([
     ('binarize', CustomBinarizer())
     ])
 
+hour_of_day = Pipeline([
+    ('select_local_time', FeatureSelector('local_time')),
+    ('convert_to_datetime', MapFeature(lambda t: pd.to_datetime(t))),
+    ('select_day', MapFeature(lambda t: t.dt.hour)),
+    ('one_hotify', EncodeFeature(range(24)))
+    ])
+
+day_of_week = Pipeline([
+    ('select_local_date', FeatureSelector('local_date')),
+    ('convert_to_datetime', MapFeature(lambda d: pd.to_datetime(d))),
+    ('select_day', MapFeature(lambda d: d.dt.dayofweek)),
+    ('one_hotify', EncodeFeature(range(7)))
+    ])
+
+month_of_year = Pipeline([
+    ('select_local_date', FeatureSelector('local_date')),
+    ('convert_to_datetime', MapFeature(lambda d: pd.to_datetime(d))),
+    ('select_day', MapFeature(lambda d: d.dt.month)),
+    ('one_hotify', EncodeFeature(range(1, 13)))
+    ])
+
 rsvp_waitlist_union = FeatureUnion([
     ('yes_rsvp_count', FeatureSelector('yes_rsvp_count', True)),
     ('waitlist_count', FeatureSelector('waitlist_count', True))
@@ -34,16 +55,19 @@ rsvp_waitlist_union = FeatureUnion([
 
 interest = Pipeline([
     ('rsvp_waitlist', rsvp_waitlist_union),
-    ('sum_cols', MapFeature(lambda x: np.sum(x, axis=1)))
+    ('log_sum_cols', MapFeature(lambda x: np.log(np.sum(x, axis=1) + 1)))
     ])
 
 meetup_union = FeatureUnion([
     ('visibility', visibility),
     ('name_tfidf', name_tfidf),
-    ('desc_tfidf', desc_tfidf)
+    ('desc_tfidf', desc_tfidf),
+    #('hour_of_day', hour_of_day),
+    ('day_of_week', day_of_week),
+    ('month_of_year', month_of_year)
     ])
 
 meetup_model = Pipeline([
     ('meetup_features', meetup_union),
-    ('model', RFRWrapper())
+    ('model', RFRWrapper(random_state=1969))
     ])
