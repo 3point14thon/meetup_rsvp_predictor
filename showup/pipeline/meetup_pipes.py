@@ -33,6 +33,18 @@ class MapFeature(BaseEstimator, TransformerMixin):
     def transform(self, X, *args, **kwargs):
         return self.f(X)
 
+class EncodeFeature(BaseEstimator, TransformerMixin):
+    def __init__(self, dummy_names):
+        self.dummy_names = dummy_names
+
+    def fit(self, *args, **kwargs):
+        return self
+
+    def transform(self, X, *args, **kwargs):
+        dummy_arr = np.array(self.dummy_names).reshape(1, -1)
+        dummy_mat = np.repeat(dummy_arr, len(X), axis=0)
+        return np.array(X).reshape(-1, 1) == dummy_mat
+
 class CustomBinarizer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None,**fit_params):
         return self
