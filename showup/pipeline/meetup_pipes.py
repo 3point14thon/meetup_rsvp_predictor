@@ -6,6 +6,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, LabelBinarizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestRegressor
+from glm.glm import GLM
+from glm.families import Poisson
 
 class FeatureSelector(BaseEstimator, TransformerMixin):
     def __init__(self, key, as_numpy=False):
@@ -69,3 +71,18 @@ class RFRWrapper(RandomForestRegressor):
     def fit_transform(self, X, y):
         self.fit(X, y)
         return self
+
+class PoissonRegression(GLM):
+
+    def __init__(self):
+        super(PoissonRegression, self).__init__(Poisson())
+
+    def transform(self, X):
+        return self
+
+    def fit_transform(self, X, y):
+        self.fit(X, y)
+        return self
+
+    def get_params(self):
+        return (self.family, self.alpha)
