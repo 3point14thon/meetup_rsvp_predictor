@@ -6,6 +6,7 @@ from sklearn.preprocessing import Imputer, Binarizer
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestRegressor
+from nltk import word_tokenize
 from .meetup_pipes import (FeatureSelector, MapFeature, CustomBinarizer, FillWith,
                           EncodeFeature, RFRWrapper)
 
@@ -22,8 +23,16 @@ desc_tfidf = Pipeline([
     ('tfidf', TfidfVectorizer(stop_words='english', max_df=0.95, min_df=.05))
     ])
 
+log_word_count = Pipeline([
+    ('select_desc', FeatureSelector('plain_text_no_images_description')),
+    ('fillnans', FillWith('')),
+    ('replace_new_line', MapFeature(lambda x: x.replace('\n', ' '))),
+    ('word_count', MapFeature(lambda x: x.map(lambda y: len(word_tokenize(y))))),
+    ('log_of_count', MapFeature(lambda x: np.array(np.log(x + 1)).reshape(-1, 1)))
+    ])
+
 visibility = Pipeline([
-    ('select_visibility', FeatureSelector('visibility', True)),
+    ('select_visibility', FeatureSelector('visibility')),
     ('binarize', CustomBinarizer())
     ])
 
@@ -62,9 +71,10 @@ meetup_union = FeatureUnion([
     ('visibility', visibility),
     ('name_tfidf', name_tfidf),
     ('desc_tfidf', desc_tfidf),
-    #('hour_of_day', hour_of_day),
+    ('hour_of_day', hour_of_day),
     ('day_of_week', day_of_week),
-    ('month_of_year', month_of_year)
+    ('month_of_year', month_of_year),
+    ('log_word_count', log_word_count)
     ])
 
 meetup_model = Pipeline([
