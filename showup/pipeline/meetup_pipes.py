@@ -89,7 +89,7 @@ class PoissonRegression(GLM):
         return self
 
     def fit_transform(self, X, y):
-        self.fit(X, y, alpha=0.5)
+        self.fit(X, y, alpha=0.75)
         return self
 
     def get_params(self):
