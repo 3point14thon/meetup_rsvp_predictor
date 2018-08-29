@@ -64,6 +64,14 @@ class FillWith(BaseEstimator, TransformerMixin):
     def transform(self, X, *args, **kwargs):
         return X.fillna(self.fill_with)
 
+class intercept(BaseEstimator, TransformerMixin):
+
+    def fit(self, *args, **kwargs):
+        return self
+
+    def transform(self, X, *args, **kwargs):
+        return np.ones(len(X)).reshape(-1, 1)
+
 class RFRWrapper(RandomForestRegressor):
     def transform(self, X):
         return self
@@ -81,7 +89,7 @@ class PoissonRegression(GLM):
         return self
 
     def fit_transform(self, X, y):
-        self.fit(X, y)
+        self.fit(X, y, alpha=0.5)
         return self
 
     def get_params(self):
