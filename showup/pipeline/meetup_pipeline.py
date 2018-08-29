@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestRegressor
 from nltk import word_tokenize
 from .meetup_pipes import (FeatureSelector, MapFeature, CustomBinarizer, FillWith,
-                          EncodeFeature, RFRWrapper)
+                          EncodeFeature, RFRWrapper, PoissonRegression, intercept)
 
 name_tfidf = Pipeline([
     ('select_name', FeatureSelector('name')),
@@ -64,7 +64,7 @@ rsvp_waitlist_union = FeatureUnion([
 
 interest = Pipeline([
     ('rsvp_waitlist', rsvp_waitlist_union),
-    ('log_sum_cols', MapFeature(lambda x: np.log(np.sum(x, axis=1) + 1)))
+    ('log_sum_cols', MapFeature(lambda x: np.log1p(np.sum(x, axis=1))))
     ])
 
 meetup_union = FeatureUnion([
@@ -77,7 +77,18 @@ meetup_union = FeatureUnion([
     ('log_word_count', log_word_count)
     ])
 
-meetup_model = Pipeline([
+intercept_union = FeatureUnion([
+    ('intercept', intercept()),
+    ('meetup_features', meetup_union)
+    ])
+
+random_forest_model = Pipeline([
     ('meetup_features', meetup_union),
     ('model', RFRWrapper(random_state=1969))
+    ])
+
+poisson_model = Pipeline([
+    ('meetup_features', intercept_union),
+    ('make_array', MapFeature(lambda x: np.array(x.todense()))),
+    ('model', PoissonRegression())
     ])
