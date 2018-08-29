@@ -2,9 +2,8 @@ let get_input_text = function() {
     let event_name = $("input#event_name").val()
     let event_description = $("textarea#event_description").val()
     let event_date = $("input#event_date").val()
-    let event_time = $("textarea#event_time").val()
+    let event_time = $("input#event_time").val()
     let event_visibility = $("select#event_visibility").val()
-    //let variable = $("input#idofthing").val()
     return {'name': event_name,
             'plain_text_no_images_description': event_description,
             'local_date': event_date,
