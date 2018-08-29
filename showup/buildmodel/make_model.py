@@ -1,13 +1,13 @@
 import sys
 sys.path.append("..")
 import pandas as pd
-from ..pipeline.meetup_pipeline import meetup_model, interest
+from ..pipeline.meetup_pipeline import random_forest_model, interest
 from .clean_data import drop_null_labels
 import dill
 
 def create_fit_pickle(X, y, filename):
     with open(filename, 'wb') as f:
-        model = meetup_model.fit(X, y)
+        model = random_forest_model.fit(X, y)
         dill.dump(model, f)
         return model
 
