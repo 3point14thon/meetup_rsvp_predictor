@@ -84,7 +84,7 @@ intercept_union = FeatureUnion([
 
 random_forest_model = Pipeline([
     ('meetup_features', meetup_union),
-    ('model', RFRWrapper(random_state=1969))
+    ('model', RFRWrapper(n_estimators=100, random_state=1969))
     ])
 
 poisson_model = Pipeline([
