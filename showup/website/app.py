@@ -23,16 +23,19 @@ def predict(text_input):
     X = text_input
     with open('showup/website/static/model.pkl', 'rb') as f:
         model = dill.load(f)
-    #prediction = model.predict(X)[0]
     trees = model.named_steps['model'].estimators_
     predictions = np.zeros(len(trees))
     for i, tree in enumerate(trees):
         predictions[i] += (tree.predict(model.named_steps['meetup_features'].transform(X)))
-    lower_bound = np.sort(predictions)[int(len(predictions)*0.05)]
-    lower_bound = int(round(log_to_people(lower_bound)))
-    upper_bound = np.sort(predictions)[int(len(predictions)*0.95)]
-    upper_bound = int(round(log_to_people(upper_bound)))
+    lower_bound, upper_bound = get_bounds(predictions)
     return str(lower_bound) + ' - ' + str(upper_bound)
+
+def get_bounds(predictions, lower_percentile = 0.05, upper_percentile = 0.95):
+    lower_bound = np.sort(predictions)[int(len(predictions)*lower_percentile)]
+    lower_bound = int(round(log_to_people(lower_bound)))
+    upper_bound = np.sort(predictions)[int(len(predictions)*upper_percentile)]
+    upper_bound = int(round(log_to_people(upper_bound)))
+    return lower_bound, upper_bound
 
 def log_to_people(x):
     return np.e**x - 1
