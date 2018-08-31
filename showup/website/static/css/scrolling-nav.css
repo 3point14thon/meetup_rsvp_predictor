@@ -4,8 +4,9 @@
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-scrolling-nav/blob/master/LICENSE)
  */
 
-header {
-  padding: 154px 0 100px;
+header#title_header {
+  padding: 110px 0 50px;
+  background-color: rgb(246, 64, 96) !important;
 }
 
 @media (min-width: 992px) {
@@ -15,5 +16,27 @@ header {
 }
 
 section {
-  padding: 150px 0;
+  padding: 60px 0;
+}
+
+span#inline_fields {
+  display: inline-flex
+}
+
+span#date_span {
+  display: block;
+  margin-right: 45px;
+}
+
+span#time_span {
+  display: block;
+  margin-right: 45px;
+}
+
+span#visibility_span {
+  display: block;
+}
+
+a#enterText {
+  background-color: rgb(246, 64, 96);
 }
