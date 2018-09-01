@@ -9,6 +9,7 @@
     <meta name="author" content="">
 
     <title>showup</title>
+    <link rel="icon" href="../static/img/s.jpeg">
 
     <!-- Bootstrap core CSS -->
     <link href="../static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -23,17 +24,14 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
       <div class="container">
-        <a class="navbar-brand js-scroll-trigger" href="#page-top">Start Bootstrap</a>
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">showup</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger" href="#about">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link js-scroll-trigger" href="#services">Services</a>
+              <a class="nav-link js-scroll-trigger" href="#about">Predict</a>
             </li>
             <li class="nav-item">
               <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
@@ -45,7 +43,7 @@
 
     <header id='title_header' class="bg-primary text-white">
       <div class="container text-center">
-        <h1>showup</h1>
+        <h1 id="header_title">showup</h1>
         <p class="lead">The meetup RSVP predictor</p>
       </div>
     </header>
@@ -54,7 +52,7 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-8 mx-auto">
-            <h2>Input your event details:</h2>
+            <h3>Input your event details:</h3>
             <br>
             Event Name:<br>
             <input type="text" id="event_name"><br>
@@ -112,8 +110,14 @@
         <div class="row">
           <div class="col-lg-8 mx-auto">
             <h2>Contact us</h2>
-            <address>
-              <a href="chris.alan.bowers@gmail.com">Chris Bowers</a>
+            <address id="contact_info">
+              <img src="../static/img/gmail.png" width="27" height="27">
+              <a href="chris.alan.bowers@gmail.com">chris.alan.bowers@gmail.com</a><br>
+              <img src="../static/img/LinkedIn.png" width="27" height="27">
+              <a href="https://www.linkedin.com/in/christopher-bowers/">https://www.linkedin.com/in/christopher-bowers/</a><br>
+              <img src="../static/img/github.png" width="27" height="27">
+              <a href="https://github.com/3point14thon">https://github.com/3point14thon</a><br>
+            </address>
           </div>
         </div>
       </div>
@@ -122,7 +126,7 @@
     <!-- Footer -->
     <footer class="py-5 bg-dark">
       <div class="container">
-        <p class="m-0 text-center text-white">Copyright &copy; Your Website 2017</p>
+        <p class="m-0 text-center text-white">showup, 2018</p>
       </div>
       <!-- /.container -->
     </footer>
