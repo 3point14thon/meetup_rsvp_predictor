@@ -13,14 +13,14 @@ from .meetup_pipes import (FeatureSelector, MapFeature, CustomBinarizer, FillWit
 name_tfidf = Pipeline([
     ('select_name', FeatureSelector('name')),
     ('fillnans', FillWith('')),
-    ('tfidf', TfidfVectorizer(stop_words='english', max_df=0.95, min_df=.05))
+    ('tfidf', TfidfVectorizer(stop_words='english', max_df=0.99, min_df=0.01))
     ])
 
 desc_tfidf = Pipeline([
     ('select_name', FeatureSelector('plain_text_no_images_description')),
     ('fillnans', FillWith('')),
     ('replace_new_line', MapFeature(lambda x: x.replace('\n', ' '))),
-    ('tfidf', TfidfVectorizer(stop_words='english', max_df=0.95, min_df=.05))
+    ('tfidf', TfidfVectorizer(stop_words='english', max_df=0.99, min_df=0.01))
     ])
 
 log_word_count = Pipeline([
@@ -84,7 +84,7 @@ intercept_union = FeatureUnion([
 
 random_forest_model = Pipeline([
     ('meetup_features', meetup_union),
-    ('model', RFRWrapper(n_estimators=100, random_state=1969))
+    ('model', RFRWrapper(n_estimators=1000, n_jobs = -1, min_samples_leaf=4, random_state=1969))
     ])
 
 poisson_model = Pipeline([
