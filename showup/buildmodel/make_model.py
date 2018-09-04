@@ -12,9 +12,14 @@ def create_fit_pickle(X, y, filename):
         dill.dump(model, f)
         return model
 
-if __name__ == '__main__':
-    meetup_df = pd.read_csv('data/data.gzip', compression='gzip')
+def get_data():
+    f = 'data/data.gzip'
+    meetup_df = pd.read_csv(f, compression='gzip')
     X = drop_null_labels(meetup_df)
     y = interest.fit_transform(X)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1969)
+    return train_test_split(X, y, random_state=1969)
+
+
+if __name__ == '__main__':
+    X_train, X_test, y_train, y_test = get_data()
     create_fit_pickle(X_train, y_train, 'showup/website/static/model.pkl')
