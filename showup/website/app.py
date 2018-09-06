@@ -16,9 +16,9 @@ def index():
 @app.route("/submit", methods=["POST"])
 def submit():
     '''Retrieves prediction then returns in json format'''
-     user_data = pd.DataFrame(request.json, index=[0])
-     prediction = predict(user_data)
-     return jsonify({'prediction': prediction})
+    user_data = pd.DataFrame(request.json, index=[0])
+    prediction = predict(user_data)
+    return jsonify({'prediction': prediction})
 
 def predict(text_input):
     '''Returns predicted event turn out range for text_input'''
