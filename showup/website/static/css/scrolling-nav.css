@@ -23,6 +23,10 @@ section {
   padding: 60px 0;
 }
 
+input#event_name {
+  width: 480px;
+}
+
 span#inline_fields {
   display: inline-flex
 }
