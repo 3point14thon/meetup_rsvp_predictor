@@ -1,10 +1,10 @@
-# meetup_rsvp_predictor
+# showup
 
-## Using machine learning to predict event attendance
+## Using machine learning to predict meetup attendance event attendance
 
 ### Motivation
 
-Anyone who has thrown an event knows the toil of guessing the number of people to plan for. Plan for too many people and you are left with too much food and an uncomfortably large room or conversely you find your self packed into a small room try to give away food that will surly spoil if it can't find a home.
+Anyone who has thrown an event knows the toil of guessing the number of people to plan for. Plan for too many people and you are left with too much food and an uncomfortably large room or conversely you find your self packed into a small room trying to give away food that will surely spoil if it can't find a home.
 
 By giving an estimated range of people I aim to alleviate some of this frustration.
 
