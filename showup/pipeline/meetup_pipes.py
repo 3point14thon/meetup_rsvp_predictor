@@ -1,4 +1,3 @@
-#import dill
 import numpy as np
 import pandas as pd
 import operator
@@ -10,6 +9,10 @@ from glm.glm import GLM
 from glm.families import Poisson
 
 class FeatureSelector(BaseEstimator, TransformerMixin):
+    '''
+    Returns the series of name key after fit and transformed to a data set X.
+    If as_numpy is true a numpy array is returned.
+    '''
     def __init__(self, key, as_numpy=False):
         self.key = key
         self.as_numpy = as_numpy
@@ -26,6 +29,9 @@ class FeatureSelector(BaseEstimator, TransformerMixin):
         return X.loc[:, self.key]
 
 class MapFeature(BaseEstimator, TransformerMixin):
+    '''
+    Maps the funciton f to all elements of X after fit and transform.
+    '''
     def __init__(self, f):
         self.f = f
 
@@ -36,6 +42,9 @@ class MapFeature(BaseEstimator, TransformerMixin):
         return self.f(X)
 
 class EncodeFeature(BaseEstimator, TransformerMixin):
+    '''
+    One hot encodes X using the dummy_names parameter after fit and transform.
+    '''
     def __init__(self, dummy_names):
         self.dummy_names = dummy_names
 
@@ -48,13 +57,18 @@ class EncodeFeature(BaseEstimator, TransformerMixin):
         return np.array(X).reshape(-1, 1) == dummy_mat
 
 class CustomBinarizer(BaseEstimator, TransformerMixin):
+    '''
+    A wrapper for CustomBinarizer to allow it to work in sklearns Pipline.
+    '''
     def fit(self, X, y=None,**fit_params):
         return self
     def transform(self, X):
         return LabelBinarizer().fit(X).transform(X)
 
 class FillWith(BaseEstimator, TransformerMixin):
-
+    '''
+    Fills all nan values with fill_with after fit and transform.
+    '''
     def __init__(self, fill_with):
         self.fill_with = fill_with
 
@@ -65,7 +79,9 @@ class FillWith(BaseEstimator, TransformerMixin):
         return X.fillna(self.fill_with)
 
 class intercept(BaseEstimator, TransformerMixin):
-
+    '''
+    Returns a column of 1s after fit and transform.
+    '''
     def fit(self, *args, **kwargs):
         return self
 
@@ -73,6 +89,9 @@ class intercept(BaseEstimator, TransformerMixin):
         return np.ones(len(X)).reshape(-1, 1)
 
 class RFRWrapper(RandomForestRegressor):
+    '''
+    A wrapper for RandomForestRegressor to allow it to work in sklearns Pipline.
+    '''
     def transform(self, X):
         return self
 
@@ -81,7 +100,9 @@ class RFRWrapper(RandomForestRegressor):
         return self
 
 class PoissonRegression(GLM):
-
+    '''
+    A wrapper for PoissonRegression to allow it to work in sklearns Pipline.
+    '''
     def __init__(self):
         super(PoissonRegression, self).__init__(Poisson())
 

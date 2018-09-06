@@ -15,12 +15,13 @@ def index():
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    '''Retrieves prediction then '''
+    '''Retrieves prediction then returns in json format'''
      user_data = pd.DataFrame(request.json, index=[0])
      prediction = predict(user_data)
      return jsonify({'prediction': prediction})
 
 def predict(text_input):
+    '''Returns predicted event turn out range for text_input'''
     X = text_input
     with open('showup/website/static/model.pkl', 'rb') as f:
         model = dill.load(f)
@@ -32,6 +33,7 @@ def predict(text_input):
     return str(lower_bound) + ' - ' + str(upper_bound)
 
 def get_bounds(predictions, lower_percentile = 0.25, upper_percentile = 0.75):
+    '''Gets first and third quartile indicies'''
     lower_bound = np.sort(predictions)[int(len(predictions)*lower_percentile)]
     lower_bound = int(round(np.expm1(lower_bound)))
     upper_bound = np.sort(predictions)[int(len(predictions)*upper_percentile)]

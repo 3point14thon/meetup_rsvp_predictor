@@ -10,6 +10,9 @@ from nltk import word_tokenize
 from .meetup_pipes import (FeatureSelector, MapFeature, CustomBinarizer, FillWith,
                           EncodeFeature, RFRWrapper, PoissonRegression, intercept)
 
+'''
+Feature Piplines
+'''
 name_tfidf = Pipeline([
     ('select_name', FeatureSelector('name')),
     ('fillnans', FillWith('')),
@@ -29,11 +32,6 @@ log_word_count = Pipeline([
     ('replace_new_line', MapFeature(lambda x: x.replace('\n', ' '))),
     ('word_count', MapFeature(lambda x: x.map(lambda y: len(word_tokenize(y))))),
     ('log_of_count', MapFeature(lambda x: np.array(np.log(x + 1)).reshape(-1, 1)))
-    ])
-
-visibility = Pipeline([
-    ('select_visibility', FeatureSelector('visibility')),
-    ('binarize', CustomBinarizer())
     ])
 
 hour_of_day = Pipeline([
@@ -77,6 +75,17 @@ meetup_union = FeatureUnion([
     ('log_word_count', log_word_count)
     ])
 
+'''
+Label Pipline
+'''
+visibility = Pipeline([
+    ('select_visibility', FeatureSelector('visibility')),
+    ('binarize', CustomBinarizer())
+    ])
+
+'''
+Model Piplines
+'''
 intercept_union = FeatureUnion([
     ('intercept', intercept()),
     ('meetup_features', meetup_union)
@@ -84,7 +93,8 @@ intercept_union = FeatureUnion([
 
 random_forest_model = Pipeline([
     ('meetup_features', meetup_union),
-    ('model', RFRWrapper(n_estimators=1000, n_jobs = -1, min_samples_leaf=4, random_state=1969))
+    ('model', RFRWrapper(n_estimators=1000, n_jobs = -1,
+                         min_samples_leaf=4, random_state=1969))
     ])
 
 poisson_model = Pipeline([
