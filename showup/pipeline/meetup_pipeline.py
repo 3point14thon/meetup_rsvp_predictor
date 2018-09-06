@@ -60,9 +60,9 @@ rsvp_waitlist_union = FeatureUnion([
     ('waitlist_count', FeatureSelector('waitlist_count', True))
     ])
 
-interest = Pipeline([
-    ('rsvp_waitlist', rsvp_waitlist_union),
-    ('log_sum_cols', MapFeature(lambda x: np.log1p(np.sum(x, axis=1))))
+visibility = Pipeline([
+    ('select_visibility', FeatureSelector('visibility')),
+    ('binarize', CustomBinarizer())
     ])
 
 meetup_union = FeatureUnion([
@@ -78,11 +78,11 @@ meetup_union = FeatureUnion([
 '''
 Label Pipline
 '''
-visibility = Pipeline([
-    ('select_visibility', FeatureSelector('visibility')),
-    ('binarize', CustomBinarizer())
+interest = Pipeline([
+    ('rsvp_waitlist', rsvp_waitlist_union),
+    ('log_sum_cols', MapFeature(lambda x: np.log1p(np.sum(x, axis=1))))
     ])
-
+    
 '''
 Model Piplines
 '''
