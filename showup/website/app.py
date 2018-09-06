@@ -15,6 +15,7 @@ def index():
 
 @app.route("/submit", methods=["POST"])
 def submit():
+    '''Retrieves prediction then '''
      user_data = pd.DataFrame(request.json, index=[0])
      prediction = predict(user_data)
      return jsonify({'prediction': prediction})
@@ -30,15 +31,12 @@ def predict(text_input):
     lower_bound, upper_bound = get_bounds(predictions)
     return str(lower_bound) + ' - ' + str(upper_bound)
 
-def get_bounds(predictions, lower_percentile = 0.05, upper_percentile = 0.95):
+def get_bounds(predictions, lower_percentile = 0.25, upper_percentile = 0.75):
     lower_bound = np.sort(predictions)[int(len(predictions)*lower_percentile)]
-    lower_bound = int(round(log_to_people(lower_bound)))
+    lower_bound = int(round(np.expm1(lower_bound)))
     upper_bound = np.sort(predictions)[int(len(predictions)*upper_percentile)]
-    upper_bound = int(round(log_to_people(upper_bound)))
+    upper_bound = int(round(np.expm1(upper_bound)))
     return lower_bound, upper_bound
-
-def log_to_people(x):
-    return np.e**x - 1
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', threaded=True)
