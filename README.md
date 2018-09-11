@@ -4,13 +4,13 @@
 
 ### Motivation
 
-Anyone who has thrown an event knows the toil of guessing the number of people to plan for. Plan for too many people and you are left with too much food and an uncomfortably large room or conversely you find your self packed into a small room trying to give away food that will surely spoil if it can't find a home.
+Anyone who has thrown an event knows the toil of guessing the number of people to plan for. Plan for too many people and you are left with too much food and an uncomfortably large room or conversely you find your self packed into a small room with a bunch of hungry guests.
 
 By giving an estimated range of people I aim to alleviate some of this frustration.
 
 ### Product
 
-The website is currently working locally and will soon be accessible via the world wide web.
+The site is currently live at showup.guru. You can also run the web app locally by cloning this repo and typing ```bash run_web_app.sh``` in the repos root directory.
 
 To get a prediction for your event input the event details, then hit the "RSVP" button.
 
