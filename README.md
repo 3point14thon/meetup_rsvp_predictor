@@ -1,6 +1,6 @@
 # showup
 
-## Using machine learning to predict meetup attendance event attendance
+## Using machine learning to predict meetup event attendance
 
 ### Motivation
 
