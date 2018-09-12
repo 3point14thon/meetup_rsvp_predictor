@@ -36,7 +36,7 @@ The model takes 6 inputs:
 * Day of week
 * Time of Day
 
-I filled missing description and name values with empty strings after confirming that this is consistant with how the description/name would be displayed on the meetup website.
+I filled missing description and name values with empty strings after confirming that this is consistent with how the description/name would be displayed on the meetup website.
 
 #### Scoring and Label Processing
 The "yes_rsvp_count" and "waitlist_count" columns from the original meetup data were summed together to get total attendance. This was then loged + 1 ,log(y + 1). Mean squared error was used as the performance metric but was empleminted before the labels or predictions were converted back from log form. The end result is a scoring metric that behaves like mean squared log error.
@@ -45,3 +45,8 @@ The "yes_rsvp_count" and "waitlist_count" columns from the original meetup data 
 I tried both a poisson regression and a random forest regressor at several hyperparameters. Ultimately random forest outperformed the poisson regression. Getting an average three fold cross validation score of 0.44 opposed to the poisson regression score of 0.66.
 
 For the final model I increased the number of trees to 1,000 resulting in a test score of 0.36. Using the average of the training data attendance as a prediction gets a score of 0.77 for comparison.
+
+### Future Work
+* More EDA and feature engineering. The model consistently under predicts for events with large attendances. I hope to correct this and improve overall predictive power as well.
+* Collect national data for the same time window. The current data set is focused on Seattle. Collecting data for the nation should broaden the area the model will give reasonable results for.
+* Rework pipline for Spark compatibility. Data for the nation will require cluster computing due to it's volume.
