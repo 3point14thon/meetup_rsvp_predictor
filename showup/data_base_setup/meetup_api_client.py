@@ -110,7 +110,6 @@ class MeetupApiClient:
             for group in groups['data']:
                 group_name = group['urlname']
                 params = {'fields': ','.join([
-                              'description_images',
                               'event_hosts',
                               'featured',
                               'featured_photo',
