@@ -23,7 +23,7 @@ CREATE TABLE events (
   updated BIGINT,
   utc_offset INT,
   venue_id INT,
-  visibility VARCHAR(14),
+  visibility VARCHAR(13),
   waitlist_count INT,
   why TEXT,
   yes_rsvp_count INT
@@ -44,7 +44,7 @@ CREATE TABLE venue (
   name TEXT,
   phone VARCHAR(32),
   repinned BOOLEAN,
-  state VARCHAR(2)
+  state CHAR(2)
   zip VARCHAR(16)
 );
 
@@ -60,11 +60,11 @@ CREATE TABLE rsvp_rules (
   no_refund BOOLEAN,
   member_cancellation_refund BOOLEAN,
   event_rescheduled_refund BOOLEAN,
-  waitlisting VARCHAR(7)
+  waitlisting VARCHAR(6)
 );
 
 CREATE TABLE event_hosts(
-  
+
 );
 
 CREATE TABLE featured_photo(
@@ -76,5 +76,10 @@ CREATE TABLE featured_photo(
 );
 
 CREATE TABLE fee(
-
+  accepts VARCHAR(6),
+  amount INT,
+  currency CHAR(3),
+  description TEXT,
+  label TEXT,
+  required, BOOLEAN
 );
