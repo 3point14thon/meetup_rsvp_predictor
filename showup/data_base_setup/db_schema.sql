@@ -1,5 +1,3 @@
-CREATE DATABASE meetups;
-
 CREATE TABLE events (
   id VARCHAR(20),
   created BIGINT,
@@ -41,7 +39,7 @@ CREATE TABLE venue (
   Localized_country_name VARCHAR(32),
   --lat and lon precision and scale based off this:
   --https://en.wikipedia.org/wiki/Decimal_degrees#Precision
-  lat DOUBLE PRECISION,
+  lat DOUBLE PRECISION, --look into postGIS
   lon DOUBLE PRECISION,
   name TEXT,
   phone VARCHAR(32),
@@ -65,6 +63,18 @@ CREATE TABLE rsvp_rules (
   waitlisting VARCHAR(7)
 );
 
-CREATE TABLE event_hosts;
-CREATE TABLE featured_photo;
-CREATE TABLE fee(link this with id);
+CREATE TABLE event_hosts(
+  
+);
+
+CREATE TABLE featured_photo(
+  base_url TEXT,
+  highres_link TEXT,
+  id INT,
+  photo_link TEXT,
+  thumb_link TEXT
+);
+
+CREATE TABLE fee(
+
+);
