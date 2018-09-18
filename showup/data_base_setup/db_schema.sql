@@ -29,6 +29,8 @@ CREATE TABLE event (
   yes_rsvp_count INT
 );
 
+CREATE INDEX id ON event (id);
+
 CREATE TABLE venue (
   address_1 TEXT,
   address_2 TEXT,
@@ -48,6 +50,8 @@ CREATE TABLE venue (
   zip VARCHAR(16)
 );
 
+CREATE INDEX id ON venue (id);
+
 CREATE TABLE rsvp_rules (
   event_id VARCHAR(20)
   close_time BIGINT,
@@ -63,6 +67,8 @@ CREATE TABLE rsvp_rules (
   waitlisting VARCHAR(6)
 );
 
+CREATE INDEX event_id ON rsvp_rules (event_id);
+
 CREATE TABLE host(
   id INT,
   name TEXT,
@@ -73,10 +79,14 @@ CREATE TABLE host(
   role VARCHAR(19)
 );
 
+CREATE INDEX id ON host (id);
+
 CREATE TABLE hosted(
   event_id VARCHAR(20),
   host_id INT
 );
+
+CREATE INDEX event_hosted ON hosted (event_id, host_id);
 
 CREATE TABLE photo(
   base_url TEXT,
@@ -87,6 +97,8 @@ CREATE TABLE photo(
   type VARCHAR(6)
 );
 
+CREATE INDEX id ON photo (id);
+
 CREATE TABLE fee(
   event_id VARCHAR(20)
   accepts VARCHAR(6),
@@ -96,3 +108,5 @@ CREATE TABLE fee(
   label TEXT,
   required, BOOLEAN
 );
+
+CREATE INDEX event_id ON fee (event_id);
