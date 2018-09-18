@@ -1,4 +1,4 @@
-CREATE TABLE events (
+CREATE TABLE event (
   id VARCHAR(20),
   created BIGINT,
   description TEXT,
@@ -63,19 +63,32 @@ CREATE TABLE rsvp_rules (
   waitlisting VARCHAR(6)
 );
 
-CREATE TABLE event_hosts(
-
+CREATE TABLE host(
+  id INT,
+  name TEXT,
+  intro TEXT,
+  photo_id INT,
+  host_count INT,
+  join_date BIGINT,
+  role VARCHAR(19)
 );
 
-CREATE TABLE featured_photo(
+CREATE TABLE hosted(
+  event_id VARCHAR(20),
+  host_id INT
+);
+
+CREATE TABLE photo(
   base_url TEXT,
   highres_link TEXT,
   id INT,
   photo_link TEXT,
-  thumb_link TEXT
+  thumb_link TEXT,
+  type VARCHAR(6)
 );
 
 CREATE TABLE fee(
+  event_id VARCHAR(20)
   accepts VARCHAR(6),
   amount INT,
   currency CHAR(3),
