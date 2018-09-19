@@ -100,7 +100,7 @@ CREATE TABLE photo(
 CREATE INDEX id ON photo (id);
 
 CREATE TABLE fee(
-  event_id VARCHAR(20)
+  event_id VARCHAR(20),
   accepts VARCHAR(6),
   amount INT,
   currency CHAR(3),
@@ -110,3 +110,55 @@ CREATE TABLE fee(
 );
 
 CREATE INDEX event_id ON fee (event_id);
+
+CREATE TABLE group (
+  id INT,
+  created BIGINT,
+  name TEXT,
+  join_mode  VARCHAR(8),
+  lat DOUBLE PRECISION,
+  lon DOUBLE PRECISION,
+  urlname TEXT,
+  who TEXT,
+  localized_location TEXT,
+  region VARCHAR(8),
+  timezone
+  pro_network_id
+  category_id
+  visibility
+  key_photo_id
+  photo
+  questions_req BOOLEAN,
+  photo_req BOOLEAN,
+  past_event_count INT
+);
+
+CREATE TABLE join_questions (
+  group_id INT,
+  question TEXT
+);
+
+CREATE TABLE topic (
+  id INT,
+  name TEXT,
+  urlkey TEXT,
+  lang VARCHAR(8),
+);
+
+CREATE TABLE group_topics (
+  group_id INT,
+  topic_id INT
+);
+
+CREATE TABLE pro_network (
+
+);
+
+CREATE TABLE category (
+
+);
+
+
+CREATE TABLE series (
+
+);
