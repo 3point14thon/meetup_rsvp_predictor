@@ -123,11 +123,11 @@ CREATE TABLE group (
   localized_location TEXT,
   region VARCHAR(8),
   timezone
-  pro_network_id
-  category_id
-  visibility
-  key_photo_id
-  photo
+  pro_network_urlname VARCHAR(32),
+  category_id SMALLINT,
+  visibility VARCHAR(13),
+  key_photo_id INT,
+  photo_id INT,
   questions_req BOOLEAN,
   photo_req BOOLEAN,
   past_event_count INT
@@ -151,14 +151,43 @@ CREATE TABLE group_topics (
 );
 
 CREATE TABLE pro_network (
-
+  urlname VARCHAR(32),
+  name TEXT,
+  number_of_groups INT,
+  network_url TEXT
 );
 
 CREATE TABLE category (
-
+  id SMALLINT,
+  name VARCHAR(64),
+  shortname VARCHAR(64),
+  shortname VARCHAR(64)
 );
 
 
 CREATE TABLE series (
+  id INT,
+  description TEXT,
+  end_date BIGINT,
+  start_date BIGINT,
+  template_event_id INT,
+);
 
+CREATE TABLE monthly_series (
+  series_id INT,
+  days_of_week SMALLINT,
+  series_interval SMALLINT,
+  week_of_month SMALLINT
+);
+
+CREATE TABLE weekly_series (
+  series_id INT,
+  series_interval SMALLINT,
+  monday BOOLEAN,
+  tuesday BOOLEAN,
+  wednesday BOOLEAN,
+  thursday BOOLEAN,
+  friday BOOLEAN,
+  saturday BOOLEAN,
+  sunday BOOLEAN,
 );
