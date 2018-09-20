@@ -29,14 +29,12 @@ CREATE TABLE event (
   yes_rsvp_count INT
 );
 
-CREATE INDEX id ON event (id);
-
 CREATE TABLE venue (
   address_1 TEXT,
   address_2 TEXT,
   address_3 TEXT,
   city VARCHAR(32),
-  country CHAR(2)
+  country CHAR(2),
   id INT,
   Localized_country_name VARCHAR(32),
   --lat and lon precision and scale based off this:
@@ -46,14 +44,12 @@ CREATE TABLE venue (
   name TEXT,
   phone VARCHAR(32),
   repinned BOOLEAN,
-  state CHAR(2)
+  state CHAR(2),
   zip VARCHAR(16)
 );
 
-CREATE INDEX id ON venue (id);
-
 CREATE TABLE rsvp_rules (
-  event_id VARCHAR(20)
+  event_id VARCHAR(20),
   close_time BIGINT,
   closed BOOLEAN,
   guest_limit INT,
@@ -67,8 +63,6 @@ CREATE TABLE rsvp_rules (
   waitlisting VARCHAR(6)
 );
 
-CREATE INDEX event_id ON rsvp_rules (event_id);
-
 CREATE TABLE host(
   id INT,
   name TEXT,
@@ -79,16 +73,14 @@ CREATE TABLE host(
   role VARCHAR(19)
 );
 
-CREATE INDEX id ON host (id);
 
-CREATE TABLE hosted(
+CREATE TABLE hosted (
   event_id VARCHAR(20),
   host_id INT
 );
 
-CREATE INDEX event_hosted ON hosted (event_id, host_id);
 
-CREATE TABLE photo(
+CREATE TABLE photo (
   base_url TEXT,
   highres_link TEXT,
   id INT,
@@ -97,21 +89,19 @@ CREATE TABLE photo(
   type VARCHAR(6)
 );
 
-CREATE INDEX id ON photo (id);
 
-CREATE TABLE fee(
+CREATE TABLE fee (
   event_id VARCHAR(20),
   accepts VARCHAR(6),
   amount INT,
   currency CHAR(3),
   description TEXT,
   label TEXT,
-  required, BOOLEAN
+  required BOOLEAN
 );
 
-CREATE INDEX event_id ON fee (event_id);
 
-CREATE TABLE group (
+CREATE TABLE meetup_group (
   id INT,
   created BIGINT,
   name TEXT,
@@ -122,7 +112,7 @@ CREATE TABLE group (
   who TEXT,
   localized_location TEXT,
   region VARCHAR(8),
-  timezone
+  timezone VARCHAR(64),
   pro_network_urlname VARCHAR(32),
   category_id SMALLINT,
   visibility VARCHAR(13),
@@ -133,8 +123,13 @@ CREATE TABLE group (
   past_event_count INT
 );
 
-CREATE TABLE join_questions (
+CREATE TABLE group_questions (
   group_id INT,
+  questions_id INT
+);
+
+CREATE TABLE questions (
+  id INT,
   question TEXT
 );
 
@@ -142,7 +137,7 @@ CREATE TABLE topic (
   id INT,
   name TEXT,
   urlkey TEXT,
-  lang VARCHAR(8),
+  lang VARCHAR(8)
 );
 
 CREATE TABLE group_topics (
@@ -161,7 +156,7 @@ CREATE TABLE category (
   id SMALLINT,
   name VARCHAR(64),
   shortname VARCHAR(64),
-  shortname VARCHAR(64)
+  sortname VARCHAR(64)
 );
 
 
@@ -170,7 +165,7 @@ CREATE TABLE series (
   description TEXT,
   end_date BIGINT,
   start_date BIGINT,
-  template_event_id INT,
+  template_event_id INT
 );
 
 CREATE TABLE monthly_series (
@@ -189,5 +184,5 @@ CREATE TABLE weekly_series (
   thursday BOOLEAN,
   friday BOOLEAN,
   saturday BOOLEAN,
-  sunday BOOLEAN,
+  sunday BOOLEAN
 );
