@@ -119,7 +119,6 @@ CREATE TABLE meetup_group (
   category_id SMALLINT,
   visibility VARCHAR(13),
   key_photo_id INT,
-  photo_id INT,
   questions_req BOOLEAN,
   photo_req BOOLEAN,
   past_event_count INT,
