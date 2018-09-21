@@ -159,7 +159,6 @@ CREATE TABLE category (
   sortname VARCHAR(64)
 );
 
-
 CREATE TABLE series (
   id INT,
   description TEXT,
