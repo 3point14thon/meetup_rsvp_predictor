@@ -78,10 +78,9 @@ class MeetupApiClient:
         self.cur.execute(f"INSERT INTO meta_data {cols} VALUES {values};")
         self.conn.commit()
 
-
-    def insert_group(self, res):
+    def insert_group(self, group, meta_data_url):
         cols = ('id',
-                'meta_data',
+                'meta_data_url',
                 'created',
                 'name',
                 'join_mode',
@@ -96,20 +95,33 @@ class MeetupApiClient:
                 'category_id',
                 'visibility',
                 'key_photo_id',
-                'photo_id',
                 'questions_req',
                 'photo_req',
                 'past_event_count',
                 'members',
                 'description')
-        find_values()
-        insert_group()
+        values = find_values(group, cols)
+        values[cols.index('meta_data_url')] = meta_data_url
+        values[cols.index('pro_network_urlname')] = group['pro_network']['network_url']
+        values[cols.index('category_id')] = group['category']['id']
+        values[cols.index('key_photo_id')] = group['key_photo']['id']
         insert_pronet()
         insert_topic()
+        insert_group_topics()
         insert_category()
-        insert_photo()
+        insert_group_category()
         insert_photo()
         insert_questions()
+        insert_group_questions()
+
+    def find_values(self, group, cols):
+        values = []
+        for col in cols:
+            if col in group[col]:
+                values.append(res)
+            else:
+                values.append(None)
+        return values
 
     def partition_link(self, header):
         return header['Link'].partition(',')[0].partition(';')
