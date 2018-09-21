@@ -1,5 +1,6 @@
 CREATE TABLE event (
   id VARCHAR(20),
+  meta_data_url TEXT,
   created BIGINT,
   description TEXT,
   duration INT,
@@ -103,6 +104,7 @@ CREATE TABLE fee (
 
 CREATE TABLE meetup_group (
   id INT,
+  meta_data_url TEXT,
   created BIGINT,
   name TEXT,
   join_mode  VARCHAR(8),
@@ -120,7 +122,9 @@ CREATE TABLE meetup_group (
   photo_id INT,
   questions_req BOOLEAN,
   photo_req BOOLEAN,
-  past_event_count INT
+  past_event_count INT,
+  members INT,
+  description TEXT
 );
 
 CREATE TABLE group_questions (
@@ -184,4 +188,11 @@ CREATE TABLE weekly_series (
   friday BOOLEAN,
   saturday BOOLEAN,
   sunday BOOLEAN
+);
+
+CREATE TABLE meta_data (
+  url TEXT,
+  rel_links TEXT,
+  url_code SMALLINT,
+  req_date DATE
 );
