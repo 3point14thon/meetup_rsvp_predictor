@@ -1,7 +1,7 @@
 import requests
 from time import sleep
 from api_key import api_key
-import pymongo
+import psycopg2 as pg2
 
 class MeetupApiClient:
     '''
@@ -35,6 +35,14 @@ class MeetupApiClient:
         self.meetup_url = 'https://api.meetup.com/'
         self.current_res = None
         self.prev_res = None
+        self.cur = None
+        self.conn = None
+        connect_db()
+
+    def connect_db(self):
+        self.conn = pg2.connect(dbname='meetups', user = 'postgres',
+                           password = 'password', host = 'localhost')
+        self.cur = conn.cursor()
 
     def make_group_key(self, api_method, parameters):
         if api_method == 'find/groups':
@@ -45,17 +53,63 @@ class MeetupApiClient:
             return api_method
 
     def cache_if_new(self, table, id_, api_method, parameters):
-        if not table.find_one({'url': id_}):
+        find_id = 'SELECT url FROM meta_data;'
+        if not cur.execute(find_id):
             res = self.get_item(api_method, parameters)
             if res.status_code != 404:
-                table.insert_one({'url': id_,
-                                  'header': res.headers,
-                                  'data': res.json(),
-                                  'urlcode': res.status_code})
+                if api_method=='find/groups':
+                    insert_meta(res)
+                    insert_group(res)
+                else:
+                    insert_meta(res)
+                    insert_event()
                 self.api_cooldown(res.headers)
             return res.headers
         else:
             return table.find_one({'url': id_})['header']
+
+    def insert_meta(self, res, cur, conn):
+        url = res.url
+        rel_links = res.headers['link']
+        url_code = res.status_code
+        req_date = res.headers['date']
+        values = f"('{url}', '{rel_links}', {url_code}, '{req_date}')"
+        cols = '(url, rel_links, url_code, req_date)'
+        self.cur.execute(f"INSERT INTO meta_data {cols} VALUES {values};")
+        self.conn.commit()
+
+
+    def insert_group(self, res):
+        cols = ('id',
+                'meta_data',
+                'created',
+                'name',
+                'join_mode',
+                'lat',
+                'lon',
+                'urlname',
+                'who',
+                'localized_location',
+                'region',
+                'timezone',
+                'pro_network_urlname',
+                'category_id',
+                'visibility',
+                'key_photo_id',
+                'photo_id',
+                'questions_req',
+                'photo_req',
+                'past_event_count',
+                'members',
+                'description')
+        find_values()
+        insert_group()
+        insert_pronet()
+        insert_topic()
+        insert_category()
+        insert_photo()
+        insert_photo()
+        insert_questions()
 
     def partition_link(self, header):
         return header['Link'].partition(',')[0].partition(';')
@@ -118,7 +172,6 @@ class MeetupApiClient:
                               'group_join_info',
                               'group_key_photo',
                               'group_membership_dues',
-                              'meta_category',
                               'best_topics',
                               'group_past_event_count',
                               'group_photo',
