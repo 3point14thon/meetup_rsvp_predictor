@@ -101,20 +101,21 @@ class MeetupApiClient:
         values[cols.index('pro_network_urlname')] = group['pro_network']['network_url']
         values[cols.index('category_id')] = group['category']['id']
         values[cols.index('key_photo_id')] = group['key_photo']['id']
+        values[cols.index('photo_req')] = group['join_info']['photo_req']
+        values[cols.index('questions_req')] = group['join_info']['questions_req']
+        self.insert_pronet(group['pro_network'])
+        for topic in group['topic']
+            self.insert_topic(topic)
+            self.insert_values('group_topics', (group['id'], topic['id']))
+        self.insert_category(group['category'])
+        self.insert_photo(group['key_photo'])
+        for question in group['join_info']['questions']:
+            self.insert_question()
+            self.insert_values('group_questions', (group['id'], question['id']))
 
-        insert_pronet()
-        insert_topic()
-        insert_group_topics()
-        insert_category()
-        insert_group_category()
-        insert_photo()
-        insert_questions()
-        insert_group_questions()
-
-    def insert_values(self, cols, values, table):
+    def insert_values(self, values, table, cols = ''):
         values = str(tuple(values))
         cols = str(tuple(cols)).replace("'", "")
-        #return f"INSERT INTO {table} {cols} VALUES {values};"
         self.cur.execute(f"INSERT INTO {table} {cols} VALUES {values};")
         self.conn.commit()
 
@@ -128,12 +129,54 @@ class MeetupApiClient:
         return values
 
     def insert_pronet(self, net):
-        cols = ('name',
-                'urlname',
-                'number_of_groups',
-                'network_url')
-        values = self.find_values(net, cols)
-        self.insert_values(cols, values, 'pro_network')
+        net_urlname = 'SELECT urlname FROM pro_network;'
+        if net['urlname'] not in self.cur.execute(net_urlname):
+            cols = ('name',
+                    'urlname',
+                    'number_of_groups',
+                    'network_url')
+            values = self.find_values(net, cols)
+            self.insert_values('pro_network', values, cols)
+
+    def insert_topic(self, topic):
+        topic_ids = 'SELECT id FROM topic;'
+        if topic['id'] not in self.cur.execute(topic_ids):
+            cols = ('id',
+                    'name',
+                    'urlkey',
+                    'lang')
+            values = self.find_values(topic, cols)
+            self.insert_values('topic', values, cols)
+
+    def insert_category(self, category):
+        category_ids = 'SELECT id FROM category;'
+        if category['id'] not in self.cur.execute(category_ids):
+            cols = ('id',
+                    'name',
+                    'shortname',
+                    'sortname')
+            values = self.find_values(category, cols)
+            self.insert_values('category', values, cols)
+
+    def insert_photo(self, photo):
+        photo_ids = 'SELECT id FROM photo;'
+        if category['id'] not in self.cur.execute(photo_ids):
+            cols = ('id',
+                    'base_url',
+                    'highres_link',
+                    'photo_link',
+                    'thumb_link',
+                    'type')
+            values = self.find_values(photo, cols)
+            self.insert_values('photo', values, cols)
+
+    def insert_question(self, question):
+        question_ids = 'SELECT id FROM questions;'
+        if question['id'] not in self.cur.execute(question_ids):
+            cols = ('id',
+                    'question')
+            values = self.find_values(questions, cols)
+            self.insert_values('questions', values, cols)
 
     def partition_link(self, header):
         return header['Link'].partition(',')[0].partition(';')
