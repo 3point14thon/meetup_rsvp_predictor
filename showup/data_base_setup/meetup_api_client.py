@@ -96,7 +96,7 @@ class MeetupApiClient:
                 'past_event_count',
                 'members',
                 'description')
-        values = find_values(group, cols)
+        values = self.find_values(group, cols)
         values[cols.index('meta_data_url')] = meta_data_url
         values[cols.index('pro_network_urlname')] = group['pro_network']['network_url']
         values[cols.index('category_id')] = group['category']['id']
@@ -111,19 +111,29 @@ class MeetupApiClient:
         insert_questions()
         insert_group_questions()
 
-    def insert_values(self, cols, values):
+    def insert_values(self, cols, values, table):
         values = str(tuple(values))
-        self.cur.execute(f"INSERT INTO meta_data {cols} VALUES {values};")
+        cols = str(tuple(cols)).replace("'", "")
+        #return f"INSERT INTO {table} {cols} VALUES {values};"
+        self.cur.execute(f"INSERT INTO {table} {cols} VALUES {values};")
         self.conn.commit()
 
     def find_values(self, item, cols):
         values = []
         for col in cols:
             if col in item:
-                values.append(group[col])
+                values.append(item[col])
             else:
                 values.append(None)
         return values
+
+    def insert_pronet(self, net):
+        cols = ('name',
+                'urlname',
+                'number_of_groups',
+                'network_url')
+        values = self.find_values(net, cols)
+        self.insert_values(cols, values, 'pro_network')
 
     def partition_link(self, header):
         return header['Link'].partition(',')[0].partition(';')
