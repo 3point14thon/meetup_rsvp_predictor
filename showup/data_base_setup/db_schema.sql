@@ -149,7 +149,7 @@ CREATE TABLE group_topics (
 );
 
 CREATE TABLE pro_network (
-  urlname VARCHAR(32),
+  urlname VARCHAR(100),
   name TEXT,
   number_of_groups INT,
   network_url TEXT
