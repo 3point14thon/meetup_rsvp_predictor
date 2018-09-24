@@ -37,12 +37,12 @@ class MeetupApiClient:
         self.prev_res = None
         self.cur = None
         self.conn = None
-        connect_db()
+        self.connect_db()
 
     def connect_db(self):
         self.conn = pg2.connect(dbname='meetups', user = 'postgres',
                            password = 'password', host = 'localhost')
-        self.cur = conn.cursor()
+        self.cur = self.conn.cursor()
 
     def make_group_key(self, api_method, parameters):
         if api_method == 'find/groups':
@@ -69,14 +69,10 @@ class MeetupApiClient:
             return table.find_one({'url': id_})['header']
 
     def insert_meta(self, res, cur, conn):
-        url = res.url
-        rel_links = res.headers['link']
-        url_code = res.status_code
-        req_date = res.headers['date']
-        values = f"('{url}', '{rel_links}', {url_code}, '{req_date}')"
+        values = (res.url, res.headers['link'],
+                  res.status_code, res.headers['date'])
         cols = '(url, rel_links, url_code, req_date)'
-        self.cur.execute(f"INSERT INTO meta_data {cols} VALUES {values};")
-        self.conn.commit()
+        self.insert_values(cols, values)
 
     def insert_group(self, group, meta_data_url):
         cols = ('id',
@@ -105,6 +101,7 @@ class MeetupApiClient:
         values[cols.index('pro_network_urlname')] = group['pro_network']['network_url']
         values[cols.index('category_id')] = group['category']['id']
         values[cols.index('key_photo_id')] = group['key_photo']['id']
+
         insert_pronet()
         insert_topic()
         insert_group_topics()
@@ -114,11 +111,16 @@ class MeetupApiClient:
         insert_questions()
         insert_group_questions()
 
-    def find_values(self, group, cols):
+    def insert_values(self, cols, values):
+        values = str(tuple(values))
+        self.cur.execute(f"INSERT INTO meta_data {cols} VALUES {values};")
+        self.conn.commit()
+
+    def find_values(self, item, cols):
         values = []
         for col in cols:
-            if col in group[col]:
-                values.append(res)
+            if col in item:
+                values.append(group[col])
             else:
                 values.append(None)
         return values
