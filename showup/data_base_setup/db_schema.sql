@@ -82,9 +82,9 @@ CREATE TABLE hosted (
 
 
 CREATE TABLE photo (
+  id INT,
   base_url TEXT,
   highres_link TEXT,
-  id INT,
   photo_link TEXT,
   thumb_link TEXT,
   type VARCHAR(6)
