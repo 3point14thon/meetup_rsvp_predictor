@@ -10,7 +10,7 @@ By giving an estimated range of people I aim to alleviate some of this frustrati
 
 ### Product
 
-The site is currently live at showup.guru. You can also run the web app locally by cloning this repo and typing ```bash run_web_app.sh``` in the repo's root directory.
+The site is currently live at [showup.guru](showup.guru). You can also run the web app locally by cloning this repo and typing ```bash run_web_app.sh``` in the repo's root directory.
 
 To get a prediction for your event input the event details, then hit the "RSVP my event!" button.
 
@@ -21,6 +21,8 @@ The model was integrated into the website via flask and the site is self-hosted 
 All the data I used in the project was gathered through [meetups' API](https://www.meetup.com/meetup_api/docs/).
 
 The data that is currently in use in this project is half the events within 100 miles of Seattle from August 8th 2015 to August 8th 2018 (about 155k events) but I hope to expand this to national data for the same time frame.
+
+![alt text](https://github.com/3point14thon/showup/blob/master/imgs/app_interface.png "web app interface")
 
 The data included in this repo is that which is currently being used. The entire corpus of data is stored in a mongo db.
 
