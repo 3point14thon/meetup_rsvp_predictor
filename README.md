@@ -10,9 +10,11 @@ By giving an estimated range of people I aim to alleviate some of this frustrati
 
 ### Product
 
-The site is currently live at showup.guru. You can also run the web app locally by cloning this repo and typing ```bash run_web_app.sh``` in the repo's root directory.
+The site is currently live at [showup.guru](showup.guru). You can also run the web app locally by cloning this repo and typing ```bash run_web_app.sh``` in the repo's root directory.
 
 To get a prediction for your event input the event details, then hit the "RSVP my event!" button.
+
+![alt text](later.png "web app interface")
 
 The model was integrated into the website via flask and the site is self-hosted on AWS.
 
