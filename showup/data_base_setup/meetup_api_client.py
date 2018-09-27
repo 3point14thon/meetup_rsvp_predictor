@@ -153,7 +153,8 @@ class MeetupApiClient:
             self.insert_values('pro_network', values, cols)
 
     def insert_topic(self, topic):
-        topic_ids = self.cur.execute('SELECT id FROM topic;')
+        self.cur.execute(f"SELECT id FROM topic WHERE id='{topic['id']}';")
+        topic_ids = self.cur.fetchone()
         if not topic_ids or topic['id'] not in topic_ids:
             cols = ('id',
                     'name',
@@ -163,7 +164,8 @@ class MeetupApiClient:
             self.insert_values('topic', values, cols)
 
     def insert_category(self, category):
-        category_ids = self.cur.execute('SELECT id FROM category;')
+        self.cur.execute(f"SELECT id FROM category WHERE id='{category['id']}';")
+        category_ids = self.cur.fetchone()
         if not category_ids or category['id'] not in category_ids:
             cols = ('id',
                     'name',
@@ -173,7 +175,8 @@ class MeetupApiClient:
             self.insert_values('category', values, cols)
 
     def insert_photo(self, photo):
-        photo_ids = self.cur.execute('SELECT id FROM photo;')
+        self.cur.execute(f"SELECT id FROM photo WHERE id='{photo['id']}';")
+        photo_ids = self.cur.fetchone()
         if not photo_ids or photo['id'] not in photo_ids:
             cols = ('id',
                     'base_url',
@@ -185,7 +188,8 @@ class MeetupApiClient:
             self.insert_values('photo', values, cols)
 
     def insert_question(self, question):
-        question_ids = self.cur.execute('SELECT id FROM questions;')
+        self.cur.execute(f"SELECT id FROM questions WHERE id='{question['id']}';")
+        question_ids = self.cur.fetchone()
         if not question_ids or ['id'] not in question_ids:
             cols = ('id',
                     'question')
