@@ -75,48 +75,60 @@ class MeetupApiClient:
         self.insert_values(cols, values)
 
     def insert_group(self, group, meta_data_url):
-        cols = ('id',
-                'meta_data_url',
-                'created',
-                'name',
-                'join_mode',
-                'lat',
-                'lon',
-                'urlname',
-                'who',
-                'localized_location',
-                'region',
-                'timezone',
-                'pro_network_urlname',
-                'category_id',
-                'visibility',
-                'key_photo_id',
-                'questions_req',
-                'photo_req',
-                'past_event_count',
-                'members',
-                'description')
-        values = self.find_values(group, cols)
-        values[cols.index('meta_data_url')] = meta_data_url
-        values[cols.index('pro_network_urlname')] = group['pro_network']['network_url']
-        values[cols.index('category_id')] = group['category']['id']
-        values[cols.index('key_photo_id')] = group['key_photo']['id']
-        values[cols.index('photo_req')] = group['join_info']['photo_req']
-        values[cols.index('questions_req')] = group['join_info']['questions_req']
-        self.insert_pronet(group['pro_network'])
-        for topic in group['topic']
-            self.insert_topic(topic)
-            self.insert_values('group_topics', (group['id'], topic['id']))
-        self.insert_category(group['category'])
-        self.insert_photo(group['key_photo'])
-        for question in group['join_info']['questions']:
-            self.insert_question()
-            self.insert_values('group_questions', (group['id'], question['id']))
+        group_id = self.cur.execute('SELECT id FROM meetup_group;')
+        if not group_id or group['id'] not in group_id:
+            cols = ('id',
+                    'meta_data_url',
+                    'created',
+                    'name',
+                    'join_mode',
+                    'lat',
+                    'lon',
+                    'urlname',
+                    'who',
+                    'localized_location',
+                    'region',
+                    'timezone',
+                    'pro_network_urlname',
+                    'category_id',
+                    'visibility',
+                    'key_photo_id',
+                    'questions_req',
+                    'photo_req',
+                    'past_event_count',
+                    'members',
+                    'description')
+            values = self.find_values(group, cols)
+            values[cols.index('meta_data_url')] = meta_data_url
+            self.update_group_reltables(group, cols, values)
+            self.insert_values('meetup_group', values, cols)
 
-    def insert_values(self, values, table, cols = ''):
-        values = str(tuple(values))
+    def update_group_reltables(self, group, cols, values):
+        if 'pro_network' in group:
+            values[cols.index('pro_network_urlname')] = group['pro_network']['network_url']
+            self.insert_pronet(group['pro_network'])
+        if 'category' in group:
+            values[cols.index('category_id')] = group['category']['id']
+            self.insert_category(group['category'])
+        if 'key_photo' in group:
+            values[cols.index('key_photo_id')] = group['key_photo']['id']
+            self.insert_photo(group['key_photo'])
+        if 'join_info' in group:
+            values[cols.index('photo_req')] = group['join_info']['photo_req']
+            values[cols.index('questions_req')] = group['join_info']['questions_req']
+            for question in group['join_info']['questions']:
+                self.insert_question()
+                self.insert_values('group_questions', (group['id'], question['id']))
+        if 'topic' in group:
+            for topic in group['topic']:
+                self.insert_topic(topic)
+                self.insert_values('group_topics', (group['id'], topic['id']))
+        return values
+
+    def insert_values(self, table, values, cols = ''):
+        place_holder = '%s,' * len(values)
         cols = str(tuple(cols)).replace("'", "")
-        self.cur.execute(f"INSERT INTO {table} {cols} VALUES {values};")
+        self.cur.execute(f"INSERT INTO {table} {cols} VALUES ({place_holder[0:-1]});", values)
         self.conn.commit()
 
     def find_values(self, item, cols):
@@ -129,8 +141,8 @@ class MeetupApiClient:
         return values
 
     def insert_pronet(self, net):
-        net_urlname = 'SELECT urlname FROM pro_network;'
-        if net['urlname'] not in self.cur.execute(net_urlname):
+        net_urlname = self.cur.execute('SELECT urlname FROM pro_network;')
+        if not net_urlname or net['urlname'] not in net_urlname:
             cols = ('name',
                     'urlname',
                     'number_of_groups',
@@ -139,8 +151,8 @@ class MeetupApiClient:
             self.insert_values('pro_network', values, cols)
 
     def insert_topic(self, topic):
-        topic_ids = 'SELECT id FROM topic;'
-        if topic['id'] not in self.cur.execute(topic_ids):
+        topic_ids = self.cur.execute('SELECT id FROM topic;')
+        if not topic_ids or topic['id'] not in topic_ids:
             cols = ('id',
                     'name',
                     'urlkey',
@@ -149,8 +161,8 @@ class MeetupApiClient:
             self.insert_values('topic', values, cols)
 
     def insert_category(self, category):
-        category_ids = 'SELECT id FROM category;'
-        if category['id'] not in self.cur.execute(category_ids):
+        category_ids = self.cur.execute('SELECT id FROM category;')
+        if not category_ids or category['id'] not in category_ids:
             cols = ('id',
                     'name',
                     'shortname',
@@ -159,8 +171,8 @@ class MeetupApiClient:
             self.insert_values('category', values, cols)
 
     def insert_photo(self, photo):
-        photo_ids = 'SELECT id FROM photo;'
-        if category['id'] not in self.cur.execute(photo_ids):
+        photo_ids = self.cur.execute('SELECT id FROM photo;')
+        if not photo_ids or category['id'] not in photo_ids:
             cols = ('id',
                     'base_url',
                     'highres_link',
@@ -171,8 +183,8 @@ class MeetupApiClient:
             self.insert_values('photo', values, cols)
 
     def insert_question(self, question):
-        question_ids = 'SELECT id FROM questions;'
-        if question['id'] not in self.cur.execute(question_ids):
+        question_ids = self.cur.execute('SELECT id FROM questions;')
+        if not question_ids or ['id'] not in question_ids:
             cols = ('id',
                     'question')
             values = self.find_values(questions, cols)
