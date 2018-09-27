@@ -115,7 +115,7 @@ CREATE TABLE meetup_group (
   localized_location TEXT,
   region VARCHAR(8),
   timezone VARCHAR(64),
-  pro_network_urlname VARCHAR(32),
+  pro_network_urlname TEXT,
   category_id SMALLINT,
   visibility VARCHAR(13),
   key_photo_id INT,
