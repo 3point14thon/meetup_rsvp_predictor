@@ -119,15 +119,16 @@ class MeetupApiClient:
             for question in group['join_info']['questions']:
                 self.insert_question()
                 self.insert_values('group_questions', (group['id'], question['id']))
-        if 'topic' in group:
-            for topic in group['topic']:
+        if 'topics' in group:
+            for topic in group['topics']:
                 self.insert_topic(topic)
                 self.insert_values('group_topics', (group['id'], topic['id']))
         return values
 
     def insert_values(self, table, values, cols = ''):
         place_holder = '%s,' * len(values)
-        cols = str(tuple(cols)).replace("'", "")
+        if cols != '':
+            cols = str(tuple(cols)).replace("'", "")
         self.cur.execute(f"INSERT INTO {table} {cols} VALUES ({place_holder[0:-1]});", values)
         self.conn.commit()
 
@@ -141,7 +142,8 @@ class MeetupApiClient:
         return values
 
     def insert_pronet(self, net):
-        net_urlname = self.cur.execute('SELECT urlname FROM pro_network;')
+        self.cur.execute(f"SELECT urlname FROM pro_network WHERE urlname='{net['urlname']}';")
+        net_urlname = self.cur.fetchone()
         if not net_urlname or net['urlname'] not in net_urlname:
             cols = ('name',
                     'urlname',
@@ -172,7 +174,7 @@ class MeetupApiClient:
 
     def insert_photo(self, photo):
         photo_ids = self.cur.execute('SELECT id FROM photo;')
-        if not photo_ids or category['id'] not in photo_ids:
+        if not photo_ids or photo['id'] not in photo_ids:
             cols = ('id',
                     'base_url',
                     'highres_link',
