@@ -52,30 +52,33 @@ class MeetupApiClient:
         else:
             return api_method
 
-    def cache_if_new(self, table, id_, api_method, parameters):
+    def cache_if_new(self, id_, api_method, parameters):
         find_id = 'SELECT url FROM meta_data;'
-        if not cur.execute(find_id):
+        if not self.cur.execute(find_id):
             res = self.get_item(api_method, parameters)
             if res.status_code != 404:
                 if api_method=='find/groups':
-                    insert_meta(res)
-                    insert_group(res)
+                    self.insert_meta(res)
+                    for group in res.json():
+                        self.insert_group(group, res.url)
                 else:
-                    insert_meta(res)
-                    insert_event()
+                    self.insert_meta(res)
+                    #self.insert_event()
                 self.api_cooldown(res.headers)
             return res.headers
         else:
-            return table.find_one({'url': id_})['header']
+            pass
+            #return table.find_one({'url': id_})['header']
 
-    def insert_meta(self, res, cur, conn):
+    def insert_meta(self, res):
         values = (res.url, res.headers['link'],
                   res.status_code, res.headers['date'])
-        cols = '(url, rel_links, url_code, req_date)'
-        self.insert_values(cols, values)
+        cols = ('url', 'rel_links', 'url_code', 'req_date')
+        self.insert_values('meta_data', values, cols)
 
     def insert_group(self, group, meta_data_url):
-        group_id = self.cur.execute('SELECT id FROM meetup_group;')
+        self.cur.execute(f"SELECT id FROM meetup_group WHERE id='{group['id']}';")
+        group_id = self.cur.fetchone()
         if not group_id or group['id'] not in group_id:
             cols = ('id',
                     'meta_data_url',
@@ -117,7 +120,7 @@ class MeetupApiClient:
             values[cols.index('photo_req')] = group['join_info']['photo_req']
             values[cols.index('questions_req')] = group['join_info']['questions_req']
             for question in group['join_info']['questions']:
-                self.insert_question()
+                self.insert_question(question)
                 self.insert_values('group_questions', (group['id'], question['id']))
         if 'topics' in group:
             for topic in group['topics']:
@@ -205,14 +208,14 @@ class MeetupApiClient:
     def next_link(self, header):
         return self.partition_link(header)[0].strip('<>')
 
-    def get_items(self, api_method, parameters, table):
+    def get_items(self, api_method, parameters):
         id_ = self.make_group_key(api_method, parameters)
         api_method = self.meetup_url + api_method
         parameters['key'] = api_key()
-        header = self.cache_if_new(table, id_, api_method, parameters)
+        header = self.cache_if_new(id_, api_method, parameters)
         while 'Link' in header and self.has_next(header):
             self.prev_res = header
-            header = self.cache_if_new(table=table, id_=self.next_link(header),
+            header = self.cache_if_new(id_=self.next_link(header),
                                        api_method=self.next_link(header),
                                        parameters={'key': api_key()})
 
@@ -228,15 +231,15 @@ class MeetupApiClient:
         if (header['X-RateLimit-Remaining']) == '0':
             sleep(float(header['X-RateLimit-Reset']))
 
-    def get_groups(self, params, table):
+    def get_groups(self, params):
         #possible parameters are described here:
         #https://www.meetup.com/meetup_api/docs/find/groups/
-        self.get_items('find/groups', params, table)
+        self.get_items('find/groups', params)
 
-    def get_events(self, params, table, urlname):
+    def get_events(self, params, urlname):
         #possible parameters are described here:
         #https://www.meetup.com/meetup_api/docs/:urlname/events/
-        self.get_items(urlname + '/events', params, table)
+        self.get_items(urlname + '/events', params)
 
 
     def find_past_events(self, start_date, end_date, group_table, event_table):
