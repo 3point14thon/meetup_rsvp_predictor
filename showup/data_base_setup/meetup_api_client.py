@@ -53,31 +53,28 @@ class MeetupApiClient:
             return api_method
 
     def cache_if_new(self, id_, api_method, parameters):
-        find_id = 'SELECT url FROM meta_data;'
-        if not self.cur.execute(find_id):
-            res = self.get_item(api_method, parameters)
-            if res.status_code != 404:
-                if api_method=='find/groups':
-                    self.insert_meta(res)
-                    for group in res.json():
-                        self.insert_group(group, res.url)
-                else:
-                    self.insert_meta(res)
-                    #self.insert_event()
-                self.api_cooldown(res.headers)
-            return res.headers
-        else:
+        res = self.get_item(api_method, parameters)
+        self.cur.execute(f"SELECT url FROM meta_data WHERE url='{res.url}';")
+        url = self.cur.fetchone()
+        if res.status_code != 404 and url != res.url:
+            if api_method=='find/groups':
+                self.insert_meta(res)
+                for group in res.json():
+                    self.insert_group(group, res.url)
+            else:
+                self.insert_meta(res)
+                #self.insert_event()
+            self.api_cooldown(res.headers)
+        return res.headers
+            else:
             pass
             #return table.find_one({'url': id_})['header']
 
     def insert_meta(self, res):
-        self.cur.execute(f"SELECT url FROM meetup_group WHERE url='res.url';")
-        url = self.cur.fetchone()i
-        if not url or res.url not in url:
-            values = (res.url, res.headers['link'],
-                      res.status_code, res.headers['date'])
-            cols = ('url', 'rel_links', 'url_code', 'req_date')
-            self.insert_values('meta_data', values, cols)
+        values = (res.url, res.headers['link'],
+                  res.status_code, res.headers['date'])
+        cols = ('url', 'rel_links', 'url_code', 'req_date')
+        self.insert_values('meta_data', values, cols)
 
     def insert_group(self, group, meta_data_url):
         self.cur.execute(f"SELECT id FROM meetup_group WHERE id='{group['id']}';")
