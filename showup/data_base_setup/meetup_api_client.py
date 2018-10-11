@@ -71,10 +71,13 @@ class MeetupApiClient:
             #return table.find_one({'url': id_})['header']
 
     def insert_meta(self, res):
-        values = (res.url, res.headers['link'],
-                  res.status_code, res.headers['date'])
-        cols = ('url', 'rel_links', 'url_code', 'req_date')
-        self.insert_values('meta_data', values, cols)
+        self.cur.execute(f"SELECT url FROM meetup_group WHERE url='res.url';")
+        url = self.cur.fetchone()i
+        if not url or res.url not in url:
+            values = (res.url, res.headers['link'],
+                      res.status_code, res.headers['date'])
+            cols = ('url', 'rel_links', 'url_code', 'req_date')
+            self.insert_values('meta_data', values, cols)
 
     def insert_group(self, group, meta_data_url):
         self.cur.execute(f"SELECT id FROM meetup_group WHERE id='{group['id']}';")
