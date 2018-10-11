@@ -56,7 +56,7 @@ class MeetupApiClient:
         res = self.get_item(api_method, parameters)
         self.cur.execute(f"SELECT url FROM meta_data WHERE url='{res.url}';")
         url = self.cur.fetchone()
-        if res.status_code != 404 and url != res.url:
+        if res.status_code != 404 and res.url not in url:
             if api_method=='find/groups':
                 self.insert_meta(res)
                 for group in res.json():
@@ -66,9 +66,6 @@ class MeetupApiClient:
                 #self.insert_event()
             self.api_cooldown(res.headers)
         return res.headers
-            else:
-            pass
-            #return table.find_one({'url': id_})['header']
 
     def insert_meta(self, res):
         values = (res.url, res.headers['link'],
