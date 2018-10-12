@@ -24,7 +24,7 @@ CREATE TABLE event (
   updated BIGINT,
   utc_offset INT,
   venue_id INT,
-  visibility VARCHAR(13),
+  visibility VARCHAR(14),
   waitlist_count INT,
   why TEXT,
   yes_rsvp_count INT
@@ -117,7 +117,7 @@ CREATE TABLE meetup_group (
   timezone VARCHAR(64),
   pro_network_urlname TEXT,
   category_id SMALLINT,
-  visibility VARCHAR(13),
+  visibility VARCHAR(14),
   key_photo_id INT,
   questions_req BOOLEAN,
   photo_req BOOLEAN,
