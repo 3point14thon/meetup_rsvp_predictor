@@ -53,7 +53,7 @@ class MeetupApiClient:
             return api_method
 
     def cache_if_new(self, id_, api_method, parameters):
-        res = self.get_item(api_method, parameters)
+        res = self.get_item(self.meetup_url + api_method, parameters)
         self.cur.execute(f"SELECT url FROM meta_data WHERE url='{res.url}';")
         url = self.cur.fetchone()
         import pdb; pdb.set_trace()
@@ -194,7 +194,7 @@ class MeetupApiClient:
         if not question_ids or ['id'] not in question_ids:
             cols = ('id',
                     'question')
-            values = self.find_values(questions, cols)
+            values = self.find_values(question, cols)
             self.insert_values('questions', values, cols)
 
     def partition_link(self, header):
@@ -208,7 +208,6 @@ class MeetupApiClient:
 
     def get_items(self, api_method, parameters):
         id_ = self.make_group_key(api_method, parameters)
-        api_method = self.meetup_url + api_method
         parameters['key'] = api_key()
         header = self.cache_if_new(id_, api_method, parameters)
         while 'Link' in header and self.has_next(header):
