@@ -51,11 +51,10 @@ class MeetupApiClient:
             return api_method
 
     def cache_if_new(self, id_, api_method, parameters):
-        res = self.get_item(self.meetup_url + api_method, parameters)
-        self.cur.execute(f"SELECT url FROM meta_data WHERE url='{res.url}';")
-        url = self.cur.fetchone()
-        if res.status_code != 404 and (not url or res.url not in url):
-            if api_method=='find/groups':
+        res = self.get_item(api_method, parameters)
+        if (res.status_code != 404 and
+            self.not_in_table('meta_data', 'url', res.url)):
+            if 'find/groups' in api_method :
                 self.insert_meta(res)
                 for group in res.json():
                     self.insert_group(group, res.url)
@@ -72,9 +71,7 @@ class MeetupApiClient:
         self.insert_values('meta_data', values, cols)
 
     def insert_group(self, group, meta_data_url):
-        self.cur.execute(f"SELECT id FROM meetup_group WHERE id='{group['id']}';")
-        group_id = self.cur.fetchone()
-        if not group_id or group['id'] not in group_id:
+        if self.not_in_table('meetup_group', 'id', group['id']):
             cols = ('id',
                     'meta_data_url',
                     'created',
@@ -123,6 +120,40 @@ class MeetupApiClient:
                 self.insert_values('group_topics', (group['id'], topic['id']))
         return values
 
+    def insert_event(self, event):
+        if self.not_in_table('event', 'id', event['id']):
+            cols = ('id',
+                    'meta_data_url',
+                    'created',
+                    'description',
+                    'duration',
+                    'event_hosts_id',
+                    'featured',
+                    'featured_photo_id',
+                    'meetup_group_id',
+                    'how_to_find_us',
+                    'link',
+                    'local_date',
+                    'local_time',
+                    'manual_attendance_coiunt',
+                    'name',
+                    'plain_text_no_images_description',
+                    'pro_is_email_shared',
+                    'rsvp_close_offset',
+                    'rsvp_limit',
+                    'rsvp_open_offset',
+                    'series_id',
+                    'time_since_epoch',
+                    'updated',
+                    'utc_offset',
+                    'venue_id',
+                    'visibility',
+                    'waitlist_count',
+                    'why',
+                    'yes_rsvp_count')
+            values = self.find_values(event, cols)
+            self.insert_values('event', values, cols)
+    
     def insert_values(self, table, values, cols = ''):
         place_holder = '%s,' * len(values)
         if cols != '':
@@ -139,10 +170,15 @@ class MeetupApiClient:
                 values.append(None)
         return values
 
+    def not_in_table(self, table, id_name, item):
+        selection = f"SELECT {id_name} FROM {table}"
+        condition = f"WHERE {id_name}='{item}';"
+        self.cur.execute(selection + condition)
+        querry = self.cur.fetchone()
+        return not querry or item not in querry
+
     def insert_pronet(self, net):
-        self.cur.execute(f"SELECT urlname FROM pro_network WHERE urlname='{net['urlname']}';")
-        net_urlname = self.cur.fetchone()
-        if not net_urlname or net['urlname'] not in net_urlname:
+        if self.not_in_table('pro_network', 'id', pro_network['urlname']):
             cols = ('name',
                     'urlname',
                     'number_of_groups',
@@ -151,9 +187,7 @@ class MeetupApiClient:
             self.insert_values('pro_network', values, cols)
 
     def insert_topic(self, topic):
-        self.cur.execute(f"SELECT id FROM topic WHERE id='{topic['id']}';")
-        topic_ids = self.cur.fetchone()
-        if not topic_ids or topic['id'] not in topic_ids:
+        if self.not_in_table('topic', 'id', topic['id']):
             cols = ('id',
                     'name',
                     'urlkey',
@@ -162,9 +196,7 @@ class MeetupApiClient:
             self.insert_values('topic', values, cols)
 
     def insert_category(self, category):
-        self.cur.execute(f"SELECT id FROM category WHERE id='{category['id']}';")
-        category_ids = self.cur.fetchone()
-        if not category_ids or category['id'] not in category_ids:
+        if self.not_in_table('category', 'id', category['id']):
             cols = ('id',
                     'name',
                     'shortname',
@@ -173,9 +205,7 @@ class MeetupApiClient:
             self.insert_values('category', values, cols)
 
     def insert_photo(self, photo):
-        self.cur.execute(f"SELECT id FROM photo WHERE id='{photo['id']}';")
-        photo_ids = self.cur.fetchone()
-        if not photo_ids or photo['id'] not in photo_ids:
+        if self.not_in_table('photo', 'id', photo['id']):
             cols = ('id',
                     'base_url',
                     'highres_link',
@@ -186,9 +216,7 @@ class MeetupApiClient:
             self.insert_values('photo', values, cols)
 
     def insert_question(self, question):
-        self.cur.execute(f"SELECT id FROM questions WHERE id='{question['id']}';")
-        question_ids = self.cur.fetchone()
-        if not question_ids or ['id'] not in question_ids:
+        if self.not_in_table('questions', 'id', question['id']):
             cols = ('id',
                     'question')
             values = self.find_values(question, cols)
@@ -206,8 +234,9 @@ class MeetupApiClient:
     def get_items(self, api_method, parameters):
         id_ = self.make_group_key(api_method, parameters)
         parameters['key'] = api_key()
+        api_method = self.meetup_url + api_method
         header = self.cache_if_new(id_, api_method, parameters)
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         while 'Link' in header and self.has_next(header):
             header = self.cache_if_new(id_=self.next_link(header),
                                        api_method=self.next_link(header),
