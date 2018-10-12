@@ -7,7 +7,7 @@ CREATE TABLE event (
   event_hosts_id INT,
   featured BOOLEAN,
   featured_photo_id INT,
-  group_id INT,
+  meetup_group_id INT,
   how_to_find_us TEXT,
   link TEXT,
   local_date DATE,
@@ -127,7 +127,7 @@ CREATE TABLE meetup_group (
 );
 
 CREATE TABLE group_questions (
-  group_id INT,
+  meetup_group_id INT,
   questions_id INT
 );
 
