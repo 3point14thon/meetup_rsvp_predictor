@@ -33,8 +33,6 @@ class MeetupApiClient:
     '''
     def __init__(self):
         self.meetup_url = 'https://api.meetup.com/'
-        self.current_res = None
-        self.prev_res = None
         self.cur = None
         self.conn = None
         self.connect_db()
@@ -209,8 +207,8 @@ class MeetupApiClient:
         id_ = self.make_group_key(api_method, parameters)
         parameters['key'] = api_key()
         header = self.cache_if_new(id_, api_method, parameters)
+        import pdb; pdb.set_trace()
         while 'Link' in header and self.has_next(header):
-            self.prev_res = header
             header = self.cache_if_new(id_=self.next_link(header),
                                        api_method=self.next_link(header),
                                        parameters={'key': api_key()})
