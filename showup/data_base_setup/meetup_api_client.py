@@ -56,7 +56,8 @@ class MeetupApiClient:
         res = self.get_item(api_method, parameters)
         self.cur.execute(f"SELECT url FROM meta_data WHERE url='{res.url}';")
         url = self.cur.fetchone()
-        if res.status_code != 404 and res.url not in url:
+        import pdb; pdb.set_trace()
+        if res.status_code != 404 and (not url or res.url not in url):
             if api_method=='find/groups':
                 self.insert_meta(res)
                 for group in res.json():
