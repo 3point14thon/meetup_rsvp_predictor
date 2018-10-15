@@ -127,7 +127,6 @@ class MeetupApiClient:
                     'created',
                     'description',
                     'duration',
-                    'event_hosts_id',
                     'featured',
                     'featured_photo_id',
                     'meetup_group_id',
@@ -135,7 +134,7 @@ class MeetupApiClient:
                     'link',
                     'local_date',
                     'local_time',
-                    'manual_attendance_coiunt',
+                    'manual_attendance_count',
                     'name',
                     'plain_text_no_images_description',
                     'pro_is_email_shared',
@@ -153,7 +152,34 @@ class MeetupApiClient:
                     'yes_rsvp_count')
             values = self.find_values(event, cols)
             self.insert_values('event', values, cols)
-    
+
+    def insert_host(self, host):
+        if self.not_in_table('host', 'id', host['id']):
+            cols = ('id',
+                    'name',
+                    'intro',
+                    'photo_id',
+                    'host_count',
+                    'join_date',
+                    'role')
+            values = self.find_values(host, cols)
+            if 'photo' in host:
+                values[cols.index('photo_id')] = host['photo']['id']
+                self.insert_photo(host['photo'])
+            self.insert_values('host', values, cols)
+
+    def insert_series(self, series):
+        if self.not_in_table('series', 'id', series['id']):
+            cols = ('id',
+                    'description',
+                    'end_date',
+                    'start_date',
+                    'template_event_id')
+            values = self.find_values(series, cols)
+            self.insert_values('series', values, cols)
+
+    def insert_venue(self, venue):
+
     def insert_values(self, table, values, cols = ''):
         place_holder = '%s,' * len(values)
         if cols != '':
