@@ -153,6 +153,27 @@ class MeetupApiClient:
             values = self.find_values(event, cols)
             self.insert_values('event', values, cols)
 
+    def update_event_reltables(self, event, cols, values):
+        if 'featured_photo' in event:
+            values[cols.index('featured_photo')] = event['featured_photo']['id']
+            self.insert_photo(event['featured_photo'])
+        if 'group' in event:
+            values[cols.index('group')] = event['group']['id']
+        if 'key_photo' in event:
+            values[cols.index('key_photo_id')] = event['key_photo']['id']
+            self.insert_photo(event['key_photo'])
+        if 'series' in event:
+            values[cols.index('series')] = event['series']['id']
+            self.insert_photo(event['series'])
+        if 'venue' in event:
+            values[cols.index('venue_id')] = event['venue']['id']
+            self.insert_photo(event['venue'])
+        if 'event_hosts' in event:
+            for host in event['event_hosts']:
+                self.insert_host(host)
+                self.insert_values('hosted', (event['id'], host['id']))
+        return values
+
     def insert_host(self, host):
         if self.not_in_table('host', 'id', host['id']):
             cols = ('id',
@@ -179,6 +200,23 @@ class MeetupApiClient:
             self.insert_values('series', values, cols)
 
     def insert_venue(self, venue):
+        if self.not_in_table('venue', 'id', venue['id']):
+            cols = ('id',
+                    'address_1',
+                    'address_2',
+                    'address_3',
+                    'city',
+                    'country',
+                    'localized_country_name',
+                    'lat',
+                    'lon',
+                    'name',
+                    'phone',
+                    'repinned',
+                    'state',
+                    'zip')
+            values = self.find_values(venue, cols)
+            self.insert_values('venue', values, cols)
 
     def insert_values(self, table, values, cols = ''):
         place_holder = '%s,' * len(values)
