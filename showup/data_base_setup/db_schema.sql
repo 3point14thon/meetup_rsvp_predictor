@@ -4,7 +4,6 @@ CREATE TABLE event (
   created BIGINT,
   description TEXT,
   duration INT,
-  event_hosts_id INT,
   featured BOOLEAN,
   featured_photo_id INT,
   meetup_group_id INT,
