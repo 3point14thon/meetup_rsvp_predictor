@@ -36,7 +36,7 @@ CREATE TABLE venue (
   city VARCHAR(32),
   country CHAR(2),
   id INT,
-  Localized_country_name VARCHAR(32),
+  localized_country_name VARCHAR(32),
   --lat and lon precision and scale based off this:
   --https://en.wikipedia.org/wiki/Decimal_degrees#Precision
   lat DOUBLE PRECISION, --look into postGIS
