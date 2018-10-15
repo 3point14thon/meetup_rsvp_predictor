@@ -151,6 +151,7 @@ class MeetupApiClient:
                     'why',
                     'yes_rsvp_count')
             values = self.find_values(event, cols)
+            values = self.update_event_reltables(event, cols, values)
             self.insert_values('event', values, cols)
 
     def update_event_reltables(self, event, cols, values):
@@ -362,4 +363,4 @@ class MeetupApiClient:
                           'no_earlier_than': start_date,
                           'no_later_than': end_date,
                           'status': 'past'}
-                self.get_events(params, event_table, group_name)
+                self.get_events(params, group_name)
