@@ -159,7 +159,7 @@ class MeetupApiClient:
             values[cols.index('featured_photo')] = event['featured_photo']['id']
             self.insert_photo(event['featured_photo'])
         if 'group' in event:
-            values[cols.index('group')] = event['group']['id']
+            values[cols.index('meetup_group_id')] = event['group']['id']
         if 'key_photo' in event:
             values[cols.index('key_photo_id')] = event['key_photo']['id']
             self.insert_photo(event['key_photo'])
@@ -237,13 +237,13 @@ class MeetupApiClient:
 
     def not_in_table(self, table, id_name, item):
         selection = f"SELECT {id_name} FROM {table}"
-        condition = f"WHERE {id_name}='{item}';"
+        condition = f" WHERE {id_name}='{item}';"
         self.cur.execute(selection + condition)
         querry = self.cur.fetchone()
         return not querry or item not in querry
 
     def insert_pronet(self, net):
-        if self.not_in_table('pro_network', 'id', pro_network['urlname']):
+        if self.not_in_table('pro_network', 'id', net['urlname']):
             cols = ('name',
                     'urlname',
                     'number_of_groups',
