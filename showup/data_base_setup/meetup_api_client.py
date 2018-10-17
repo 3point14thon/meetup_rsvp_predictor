@@ -38,29 +38,21 @@ class MeetupApiClient:
         self.connect_db()
 
     def connect_db(self):
-        self.conn = pg2.connect(dbname='meetups', user = 'postgres',
-                           password = 'password', host = 'localhost')
+        self.conn = pg2.connect(dbname='meetups', user='postgres',
+                                password='password', host='localhost')
         self.cur = self.conn.cursor()
 
-    def make_group_key(self, api_method, parameters):
-        if api_method == 'find/groups':
-            for key in parameters:
-                api_method += parameters[key]
-            return api_method
-        else:
-            return api_method
-
-    def cache_if_new(self, id_, api_method, parameters):
+    def cache_if_new(self, api_method, parameters):
         res = self.get_item(api_method, parameters)
         if (res.status_code != 404 and
             self.not_in_table('meta_data', 'url', res.url)):
-            if 'find/groups' in api_method :
-                self.insert_meta(res)
-                for group in res.json():
-                    self.insert_group(group, res.url)
+            if 'find/groups' in api_method:
+                insert = self.insert_group
             else:
-                self.insert_meta(res)
-                #self.insert_event()
+                insert = self.insert_event
+            for item in res.json():
+                insert(item, res.url)
+            self.insert_meta(res)
             self.api_cooldown(res.headers)
         return res.headers
 
@@ -165,10 +157,10 @@ class MeetupApiClient:
             self.insert_photo(event['key_photo'])
         if 'series' in event:
             values[cols.index('series')] = event['series']['id']
-            self.insert_photo(event['series'])
+            self.insert_series(event['series'])
         if 'venue' in event:
             values[cols.index('venue_id')] = event['venue']['id']
-            self.insert_photo(event['venue'])
+            self.insert_venue(event['venue'])
         if 'event_hosts' in event:
             for host in event['event_hosts']:
                 self.insert_host(host)
@@ -297,14 +289,12 @@ class MeetupApiClient:
         return self.partition_link(header)[0].strip('<>')
 
     def get_items(self, api_method, parameters):
-        id_ = self.make_group_key(api_method, parameters)
         parameters['key'] = api_key()
         api_method = self.meetup_url + api_method
         header = self.cache_if_new(id_, api_method, parameters)
         #import pdb; pdb.set_trace()
         while 'Link' in header and self.has_next(header):
-            header = self.cache_if_new(id_=self.next_link(header),
-                                       api_method=self.next_link(header),
+            header = self.cache_if_new(api_method=self.next_link(header),
                                        parameters={'key': api_key()})
 
     def get_item(self, api_method, parameters):
@@ -335,32 +325,32 @@ class MeetupApiClient:
         inconsistant on how many 400 errors are returned, might depend on
         internet connection
         '''
-        super_groups = group_table.find(no_cursor_timeout=True)
-        for groups in super_groups:
-            for group in groups['data']:
-                group_name = group['urlname']
-                params = {'fields': ','.join([
-                              'event_hosts',
-                              'featured',
-                              'featured_photo',
-                              'fee_options',
-                              'group_category',
-                              'group_join_info',
-                              'group_key_photo',
-                              'group_membership_dues',
-                              'best_topics',
-                              'group_past_event_count',
-                              'group_photo',
-                              'group_pro_network',
-                              'group_topics',
-                              'group_join_info',
-                              'how_to_find_us',
-                              'group_visibility',
-                              'plain_text_no_images_description',
-                              'rsvp_rules',
-                              'series',
-                              'answers']),
-                          'no_earlier_than': start_date,
-                          'no_later_than': end_date,
-                          'status': 'past'}
-                self.get_events(params, group_name)
+        self.curs.execute('SELECT urlname FROM meetup_group;')
+        groups = self.curs.fetchall()
+        for group in groups:
+            group_name = group[0]
+            params = {'fields': ','.join([
+                          'event_hosts',
+                          'featured',
+                          'featured_photo',
+                          'fee_options',
+                          'group_category',
+                          'group_join_info',
+                          'group_key_photo',
+                          'group_membership_dues',
+                          'best_topics',
+                          'group_past_event_count',
+                          'group_photo',
+                          'group_pro_network',
+                          'group_topics',
+                          'group_join_info',
+                          'how_to_find_us',
+                          'group_visibility',
+                          'plain_text_no_images_description',
+                          'rsvp_rules',
+                          'series',
+                          'answers']),
+                      'no_earlier_than': start_date,
+                      'no_later_than': end_date,
+                      'status': 'past'}
+            self.get_events(params, group_name)
