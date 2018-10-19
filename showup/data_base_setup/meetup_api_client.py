@@ -319,38 +319,3 @@ class MeetupApiClient:
         #https://www.meetup.com/meetup_api/docs/:urlname/events/
         self.get_items(urlname + '/events', params)
 
-
-    def find_past_events(self, start_date, end_date, group_table, event_table):
-        '''
-        inconsistant on how many 400 errors are returned, might depend on
-        internet connection
-        '''
-        self.curs.execute('SELECT urlname FROM meetup_group;')
-        groups = self.curs.fetchall()
-        for group in groups:
-            group_name = group[0]
-            params = {'fields': ','.join([
-                          'event_hosts',
-                          'featured',
-                          'featured_photo',
-                          'fee_options',
-                          'group_category',
-                          'group_join_info',
-                          'group_key_photo',
-                          'group_membership_dues',
-                          'best_topics',
-                          'group_past_event_count',
-                          'group_photo',
-                          'group_pro_network',
-                          'group_topics',
-                          'group_join_info',
-                          'how_to_find_us',
-                          'group_visibility',
-                          'plain_text_no_images_description',
-                          'rsvp_rules',
-                          'series',
-                          'answers']),
-                      'no_earlier_than': start_date,
-                      'no_later_than': end_date,
-                      'status': 'past'}
-            self.get_events(params, group_name)
