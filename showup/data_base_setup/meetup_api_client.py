@@ -103,9 +103,10 @@ class MeetupApiClient:
         if 'join_info' in group:
             values[cols.index('photo_req')] = group['join_info']['photo_req']
             values[cols.index('questions_req')] = group['join_info']['questions_req']
-            for question in group['join_info']['questions']:
-                self.insert_question(question)
-                self.insert_values('group_questions', (group['id'], question['id']))
+            if 'questions' in group['join_info']:
+                for question in group['join_info']['questions']:
+                    self.insert_question(question)
+                    self.insert_values('group_questions', (group['id'], question['id']))
         if 'topics' in group:
             for topic in group['topics']:
                 self.insert_topic(topic)
@@ -235,7 +236,7 @@ class MeetupApiClient:
         return not querry or item not in querry
 
     def insert_pronet(self, net):
-        if self.not_in_table('pro_network', 'id', net['urlname']):
+        if self.not_in_table('pro_network', 'urlname', net['urlname']):
             cols = ('name',
                     'urlname',
                     'number_of_groups',
@@ -291,7 +292,7 @@ class MeetupApiClient:
     def get_items(self, api_method, parameters):
         parameters['key'] = api_key()
         api_method = self.meetup_url + api_method
-        header = self.cache_if_new(id_, api_method, parameters)
+        header = self.cache_if_new(api_method, parameters)
         #import pdb; pdb.set_trace()
         while 'Link' in header and self.has_next(header):
             header = self.cache_if_new(api_method=self.next_link(header),
