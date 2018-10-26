@@ -1,3 +1,5 @@
+from meetup_api_client import MeetupApiClient
+
 def get_groups_in_area(mac, zip_code):
     params = {'fields': ','.join([
                       'join_info',
@@ -7,7 +9,7 @@ def get_groups_in_area(mac, zip_code):
               'zip': zip_code}
     mac.get_groups(params)
 
-def find_past_events(mac, start_date, end_date):
+def get_past_events(mac, start_date, end_date):
     '''
     inconsistant on how many 400 errors are returned, might depend on
     internet connection
@@ -36,12 +38,12 @@ def find_past_events(mac, start_date, end_date):
                     'no_earlier_than': start_date,
                     'no_later_than': end_date,
                     'status': 'past'}
-    mac.curs.execute('SELECT urlname FROM meetup_group;')
-    groups = mac.curs.fetchall()
+    mac.cur.execute('SELECT urlname FROM meetup_group;')
+    groups = mac.cur.fetchall()
     for group in groups:
         group_name = group[0]
         mac.get_events(params, group_name)
 
-def find_events_in_US():
+def get_events_in_US():
     get_groups_in_area()
     find_past_events(mac, blah, blah)
