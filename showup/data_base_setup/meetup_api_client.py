@@ -113,7 +113,7 @@ class MeetupApiClient:
                 self.insert_values('group_topics', (group['id'], topic['id']))
         return values
 
-    def insert_event(self, event):
+    def insert_event(self, event, metadata_url):
         if self.not_in_table('event', 'id', event['id']):
             cols = ('id',
                     'meta_data_url',
@@ -144,12 +144,13 @@ class MeetupApiClient:
                     'why',
                     'yes_rsvp_count')
             values = self.find_values(event, cols)
+            values[cols.index('meta_data_url')] = metadata_url
             values = self.update_event_reltables(event, cols, values)
             self.insert_values('event', values, cols)
 
     def update_event_reltables(self, event, cols, values):
         if 'featured_photo' in event:
-            values[cols.index('featured_photo')] = event['featured_photo']['id']
+            values[cols.index('featured_photo_id')] = event['featured_photo']['id']
             self.insert_photo(event['featured_photo'])
         if 'group' in event:
             values[cols.index('meetup_group_id')] = event['group']['id']
@@ -157,7 +158,7 @@ class MeetupApiClient:
             values[cols.index('key_photo_id')] = event['key_photo']['id']
             self.insert_photo(event['key_photo'])
         if 'series' in event:
-            values[cols.index('series')] = event['series']['id']
+            values[cols.index('series_id')] = event['series']['id']
             self.insert_series(event['series'])
         if 'venue' in event:
             values[cols.index('venue_id')] = event['venue']['id']
