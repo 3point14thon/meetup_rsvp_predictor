@@ -54,10 +54,14 @@ class MeetupApiClient:
                 insert(item, res.url)
             self.insert_meta(res)
             self.api_cooldown(res.headers)
-        return res.headers
+        return (res.headers['Link'], res.url)
 
     def insert_meta(self, res):
-        values = (res.url, res.headers['link'],
+        if 'Link' in res.headers:
+            link = res.headers['Link']
+        else:
+            link = None
+        values = (res.url, link,
                   res.status_code, res.headers['date'])
         cols = ('url', 'rel_links', 'url_code', 'req_date')
         self.insert_values('meta_data', values, cols)
@@ -229,11 +233,14 @@ class MeetupApiClient:
                 values.append(None)
         return values
 
-    def not_in_table(self, table, id_name, item):
+    def querry_table(self, table, id_name, condition, item):
         selection = f"SELECT {id_name} FROM {table}"
-        condition = f" WHERE {id_name}='{item}';"
+        condition = f" WHERE {condition}='{item}';"
         self.cur.execute(selection + condition)
-        querry = self.cur.fetchone()
+        return self.cur.fetchone()
+    
+    def not_in_table(self, table, id_name, item):
+        querry = self.querry_table(table, id_name, id_name, item)
         return not querry or item not in querry
 
     def insert_pronet(self, net):
@@ -281,23 +288,29 @@ class MeetupApiClient:
             values = self.find_values(question, cols)
             self.insert_values('questions', values, cols)
 
-    def partition_link(self, header):
-        return header['Link'].partition(',')[0].partition(';')
+    def partition_link(self, link):
+        return link.partition(',')[0].partition(';')
 
-    def has_next(self, header):
-        return self.partition_link(header)[2] == ' rel="next"'
+    def has_next(self, link):
+        return self.partition_link(link)[2] == ' rel="next"'
 
-    def next_link(self, header):
-        return self.partition_link(header)[0].strip('<>')
+    def next_link(self, link):
+        return self.partition_link(link)[0].strip('<>')
 
     def get_items(self, api_method, parameters):
         parameters['key'] = api_key()
         api_method = self.meetup_url + api_method
-        header = self.cache_if_new(api_method, parameters)
-        #import pdb; pdb.set_trace()
-        while 'Link' in header and self.has_next(header):
-            header = self.cache_if_new(api_method=self.next_link(header),
-                                       parameters={'key': api_key()})
+        links = self.cache_if_new(api_method, parameters)
+        while links[0]:
+            if self.not_in_table('meta_data', 'url', links[1]):
+                links = self.cache_if_new(api_method=self.next_link(links[0]),
+                                           parameters={'key': api_key()})
+            else:
+                import pdb; pdb.set_trace()
+                if links[0]:
+                    link = self.next_link(links[0])
+                    links = self.querry_table('meta_data', 'url, rel_links',
+                                                 'url',  link)
 
     def get_item(self, api_method, parameters):
         n = 0
