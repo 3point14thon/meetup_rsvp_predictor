@@ -118,7 +118,7 @@ class MeetupApiClient:
         return values
 
     def insert_event(self, event, metadata_url):
-        if self.not_in_table('event', 'id', event['id']):
+        if event and self.not_in_table('event', 'id', event['id']):
             cols = ('id',
                     'meta_data_url',
                     'created',
