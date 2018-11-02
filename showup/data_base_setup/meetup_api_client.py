@@ -44,17 +44,19 @@ class MeetupApiClient:
 
     def cache_if_new(self, api_method, parameters):
         res = self.get_item(api_method, parameters)
-        if (res.status_code != 404 and
-            self.not_in_table('meta_data', 'url', res.url)):
-            if 'find/groups' in api_method:
-                insert = self.insert_group
-            else:
-                insert = self.insert_event
-            for item in res.json():
-                insert(item, res.url)
+        if self.not_in_table('meta_data', 'url', res.url):
+            if res.status_code == 200:
+                if 'find/groups' in api_method:
+                    insert = self.insert_group
+                else:
+                    insert = self.insert_event
+                for item in res.json():
+                    insert(item, res.url)
             self.insert_meta(res)
-            self.api_cooldown(res.headers)
-        return (res.headers['Link'], res.url)
+        if 'Link' in res.headers:
+            return (res.headers['Link'], res.url)
+        else:
+            return (None, res.url)
 
     def insert_meta(self, res):
         if 'Link' in res.headers:
@@ -237,8 +239,11 @@ class MeetupApiClient:
         selection = f"SELECT {id_name} FROM {table}"
         condition = f" WHERE {condition}='{item}';"
         self.cur.execute(selection + condition)
-        return self.cur.fetchone()
-    
+        if self.cur.fetchone():
+            return self.cur.fetchone()
+        else:
+            return (None,)
+
     def not_in_table(self, table, id_name, item):
         querry = self.querry_table(table, id_name, id_name, item)
         return not querry or item not in querry
@@ -306,17 +311,18 @@ class MeetupApiClient:
                 links = self.cache_if_new(api_method=self.next_link(links[0]),
                                            parameters={'key': api_key()})
             else:
-                import pdb; pdb.set_trace()
-                if links[0]:
-                    link = self.next_link(links[0])
-                    links = self.querry_table('meta_data', 'url, rel_links',
-                                                 'url',  link)
+                link = self.next_link(links[0])
+                next_link = self.querry_table('meta_data', 'rel_links',
+                                              'url',  link)
+                links = (next_link[0], link)
 
     def get_item(self, api_method, parameters):
         n = 0
         response = requests.get(api_method, parameters)
+        self.api_cooldown(response.headers)
         while (response.status_code == 400) and (n != 100):
             response = requests.get(api_method, parameters)
+            self.api_cooldown(response.headers)
             n += 1
         return response
 
