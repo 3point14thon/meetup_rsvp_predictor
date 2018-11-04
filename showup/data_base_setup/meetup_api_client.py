@@ -327,7 +327,8 @@ class MeetupApiClient:
         return response
 
     def api_cooldown(self, header):
-        if (header['X-RateLimit-Remaining']) == '0':
+        if ('X-RateLimit-Remaining' in header and
+            header['X-RateLimit-Remaining']) == '0':
             sleep(float(header['X-RateLimit-Reset']))
 
     def get_groups(self, params):
