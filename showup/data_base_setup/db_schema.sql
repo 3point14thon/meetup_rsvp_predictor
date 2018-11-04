@@ -16,7 +16,7 @@ CREATE TABLE event (
   plain_text_no_images_description TEXT,
   pro_is_email_shared BOOLEAN,
   rsvp_close_offset VARCHAR(16),
-  rsvp_limit SMALLINT,
+  rsvp_limit INT,
   rsvp_open_offset VARCHAR(16),
   series_id INT,
   time_since_epoch BIGINT,
