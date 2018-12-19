@@ -1,3 +1,4 @@
+import pandas as pd
 from meetup_api_client import MeetupApiClient
 
 def get_groups_in_area(mac, zip_code):
@@ -44,6 +45,7 @@ def get_past_events(mac, start_date, end_date):
         group_name = group[0]
         mac.get_events(params, group_name)
 
-def get_events_in_US():
-    get_groups_in_area()
-    find_past_events(mac, blah, blah)
+def get_events_in_US(mac):
+    zip_codes = pd.read_csv('zip_codes.csv')['zip']
+    for zip_code in zip_codes:
+        get_groups_in_area(mac, zip_code)
