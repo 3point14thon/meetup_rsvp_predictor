@@ -201,22 +201,22 @@ class MeetupApiClient:
             if 'monthly' in series:
                 self.insert_monthly(series['monthly'], series['id'])
             if 'weekly' in series:
-                self.insert_monthly(series['weekly'], series['id'])
+                self.insert_weekly(series['weekly'], series['id'])
             self.insert_values('series', values, cols)
 
     def insert_monthly(self, monthly, id):
         cols = ('series_id',
                 'days_of_week',
-                'interval',
+                'series_interval',
                 'week_of_month')
         values = self.find_values(monthly, cols)
-        values['series_id'] = id
-        values['series_interval'] = monthly['interval']
+        values[cols.index('series_id')] = id
+        values[cols.index('series_interval')] = monthly['interval']
         self.insert_values('monthly_series', values, cols)
 
     def insert_weekly(self, weekly, id):
         cols = ('series_id',
-                'interval',
+                'series_interval',
                 'monday',
                 'tuesday',
                 'wednesday',
@@ -225,10 +225,10 @@ class MeetupApiClient:
                 'saturday',
                 'sunday')
         dow = dict(zip(range(1, 8), cols[2:]))
-        values['series_id'] = id
-        values['series_interval'] = weekly['interval']
+        values[cols.index('series_id')] = id
+        values[cols.index('series_interval')] = weekly['interval']
         for day in weekly['days_of_week']:
-            values[dow[day]] = True
+            values[cols.index(dow[day])] = True
         self.insert_values('weekly_series', values, cols)
 
     def insert_venue(self, venue):
