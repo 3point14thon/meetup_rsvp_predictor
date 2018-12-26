@@ -171,7 +171,7 @@ CREATE TABLE series (
 
 CREATE TABLE monthly_series (
   series_id INT,
-  days_of_week SMALLINT,
+  day_of_week SMALLINT,
   series_interval SMALLINT,
   week_of_month SMALLINT
 );
