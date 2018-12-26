@@ -198,7 +198,38 @@ class MeetupApiClient:
                     'start_date',
                     'template_event_id')
             values = self.find_values(series, cols)
+            if 'monthly' in series:
+                self.insert_monthly(series['monthly'], series['id'])
+            if 'weekly' in series:
+                self.insert_monthly(series['weekly'], series['id'])
             self.insert_values('series', values, cols)
+
+    def insert_monthly(self, monthly, id):
+        cols = ('series_id',
+                'days_of_week',
+                'interval',
+                'week_of_month')
+        values = self.find_values(monthly, cols)
+        values['series_id'] = id
+        values['series_interval'] = monthly['interval']
+        self.insert_values('monthly_series', values, cols)
+
+    def insert_weekly(self, weekly, id):
+        cols = ('series_id',
+                'interval',
+                'monday',
+                'tuesday',
+                'wednesday',
+                'thursday',
+                'friday',
+                'saturday',
+                'sunday')
+        dow = dict(zip(range(1, 8), cols[2:]))
+        values['series_id'] = id
+        values['series_interval'] = weekly['interval']
+        for day in weekly['days_of_week']:
+            values[dow[day]] = True
+        self.insert_values('weekly_series', values, cols)
 
     def insert_venue(self, venue):
         if self.not_in_table('venue', 'id', venue['id']):
@@ -340,4 +371,3 @@ class MeetupApiClient:
         #possible parameters are described here:
         #https://www.meetup.com/meetup_api/docs/:urlname/events/
         self.get_items(urlname + '/events', params)
-
