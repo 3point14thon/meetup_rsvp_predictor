@@ -206,7 +206,7 @@ class MeetupApiClient:
 
     def insert_monthly(self, monthly, id):
         cols = ('series_id',
-                'days_of_week',
+                'day_of_week',
                 'series_interval',
                 'week_of_month')
         values = self.find_values(monthly, cols)
@@ -225,6 +225,7 @@ class MeetupApiClient:
                 'saturday',
                 'sunday')
         dow = dict(zip(range(1, 8), cols[2:]))
+        values = self.find_values(weekly, cols)
         values[cols.index('series_id')] = id
         values[cols.index('series_interval')] = weekly['interval']
         for day in weekly['days_of_week']:
