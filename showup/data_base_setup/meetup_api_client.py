@@ -1,6 +1,7 @@
 import requests
 from time import sleep
 from api_key import api_key
+from db_info import db_info
 import psycopg2 as pg2
 
 class MeetupApiClient:
@@ -38,8 +39,10 @@ class MeetupApiClient:
         self.connect_db()
 
     def connect_db(self):
-        self.conn = pg2.connect(dbname='meetups', user='postgres',
-                                password='password', host='localhost')
+        db = db_info()
+        self.conn = pg2.connect(dbname=db['dbname'], user=db['username'],
+                                password=db['password'], host=db['host'],
+                                port=db['port'])
         self.cur = self.conn.cursor()
 
     def cache_if_new(self, api_method, parameters):
@@ -362,6 +365,8 @@ class MeetupApiClient:
         if ('X-RateLimit-Remaining' in header and
             header['X-RateLimit-Remaining']) == '0':
             sleep(float(header['X-RateLimit-Reset']))
+        else:
+            sleep(0.5) #to compensate for when X-ratelimit isn't given
 
     def get_groups(self, params):
         #possible parameters are described here:
